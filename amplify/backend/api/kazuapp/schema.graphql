@@ -1,0 +1,4 @@
+type PuffEvent @model @auth(rules: [{allow: public}]) {
+  id: ID!
+  eventdata: AWSJSON
+}
