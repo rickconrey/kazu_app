@@ -1,0 +1,11 @@
+{
+  "AppSyncApiName": "kazu",
+  "DynamoDBBillingMode": "PAY_PER_REQUEST",
+  "DynamoDBEnableServerSideEncryption": false,
+  "AuthCognitoUserPoolId": {
+    "Fn::GetAtt": [
+      "authkazucd76765b",
+      "Outputs.UserPoolId"
+    ]
+  }
+}

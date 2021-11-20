@@ -1,0 +1,14 @@
+{
+  "resourceName": "kazustorage",
+  "policyUUID": "a1017687",
+  "bucketName": "kazubucketdev",
+  "storageAccess": "auth",
+  "guestAccess": [],
+  "authAccess": [
+    "CREATE_AND_UPDATE",
+    "READ",
+    "DELETE"
+  ],
+  "triggerFunction": "NONE",
+  "groupAccess": {}
+}
