@@ -18,7 +18,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 version: 1.0.0+1
 
 environment:
-  sdk: ">=2.16.0-14.0.dev <3.0.0"
+  sdk: ">=2.12.0 <3.0.0"
 
 # Dependencies specify other packages that your package needs in order to work.
 # To automatically upgrade your package dependencies to the latest versions
@@ -33,7 +33,7 @@ dependencies:
   flutter_blue:
   rxdart:
 
-  flutter_bloc:
+  flutter_bloc: <7.2.0
 
   amplify_flutter:
   amplify_auth_cognito:
@@ -42,6 +42,8 @@ dependencies:
   amplify_api:
   amplify_analytics_pinpoint:
 
+  image_picker:
+  cached_network_image:
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.

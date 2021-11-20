@@ -23,13 +23,22 @@ class ConfirmationBloc extends Bloc<ConfirmationEvent, ConfirmationState> {
       yield state.copyWith(formStatus: FormSubmitting());
 
       try {
-        final userId = await authRepository.confirmSignUp(
+        bool isSignupComplete = await authRepository.confirmSignUp(
             username: authCubit.credentials.username,
             confirmationCode: state.code
         );
+
         yield state.copyWith(formStatus: SubmissionSuccess());
 
         final credentials = authCubit.credentials;
+
+        final userId = await authRepository.login(
+          username: credentials.username,
+          password: credentials.password!,
+        );
+        if (isSignupComplete) {
+
+        }
         credentials.userId = userId;
 
         authCubit.launchSession(credentials);

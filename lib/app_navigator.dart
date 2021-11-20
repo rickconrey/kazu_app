@@ -1,10 +1,10 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:kazu_app/profile/profile_view.dart';
 import 'package:kazu_app/session_cubit.dart';
 import 'package:kazu_app/session_state.dart';
-import 'package:kazu_app/session_view.dart';
 import 'package:kazu_app/views/auth_navigator.dart';
+import 'package:kazu_app/views/bottom_navigation_view.dart';
 
 import 'cubit/auth_cubit.dart';
 import 'loading_view.dart';
@@ -24,7 +24,8 @@ class AppNavigator extends StatelessWidget {
                 child: AuthNavigator(),
               ),
             ),
-          if (state is Authenticated) MaterialPage(child: SessionView())
+          if (state is Authenticated)
+            MaterialPage(child: BottomNavigationView()),
         ],
         onPopPage: (route, result) => route.didPop(result),
       );

@@ -20,32 +20,28 @@
 // ignore_for_file: public_member_api_docs, file_names, unnecessary_new, prefer_if_null_operators, prefer_const_constructors, slash_for_doc_comments, annotate_overrides, non_constant_identifier_names, unnecessary_string_interpolations, prefer_adjacent_string_concatenation, unnecessary_const, dead_code
 
 import 'package:amplify_datastore_plugin_interface/amplify_datastore_plugin_interface.dart';
-import 'PuffEvent.dart';
+import 'User.dart';
 
-export 'PuffEvent.dart';
+export 'User.dart';
 
 class ModelProvider implements ModelProviderInterface {
   @override
-  String version = "8d9476d3b084ab928b4d851f9c243a46";
+  String version = "320f6bf0d07c7e4eb45d212ce3181234";
   @override
-  List<ModelSchema> modelSchemas = [PuffEvent.schema];
+  List<ModelSchema> modelSchemas = [User.schema];
   static final ModelProvider _instance = ModelProvider();
 
   static ModelProvider get instance => _instance;
-
+  
   ModelType getModelTypeByModelName(String modelName) {
-    switch (modelName) {
-      case "PuffEvent":
-        {
-          return PuffEvent.classType;
-        }
-        break;
-      default:
-        {
-          throw Exception(
-              "Failed to find model in model provider for model name: " +
-                  modelName);
-        }
+    switch(modelName) {
+    case "User": {
+    return User.classType;
+    }
+    break;
+    default: {
+    throw Exception("Failed to find model in model provider for model name: " + modelName);
+    }
     }
   }
 }

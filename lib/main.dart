@@ -11,18 +11,23 @@ import 'package:bloc/bloc.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:kazu_app/amplifyconfiguration.dart';
 import 'package:kazu_app/models/ModelProvider.dart';
+import 'package:kazu_app/profile/profile_bloc.dart';
 import 'package:kazu_app/repositories/auth_repository.dart';
+import 'package:kazu_app/repositories/data_repository.dart';
+import 'package:kazu_app/repositories/storage_repository.dart';
 import 'package:kazu_app/session_cubit.dart';
 import 'package:kazu_app/views/auth_navigator.dart';
 import 'package:kazu_app/views/login_view.dart';
 
 import 'app_navigator.dart';
 import 'cubit/auth_cubit.dart';
+import 'loading_view.dart';
 import 'simple_bloc_observer.dart';
 
 void main() {
-  //Bloc observer = SimpleBlocObserver();
+  //BlocObserver observer = SimpleBlocObserver();
 
+  //BlocOverrides.runZoned(() => runApp(KazuApp()), blocObserver: observer);
   runApp(KazuApp());
   //runApp(const MyApp());
 }
@@ -44,37 +49,50 @@ class _AppState extends State<KazuApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'Kazu',
       theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // Try running your application with "flutter run". You'll see the
-        // application has a blue toolbar. Then, without quitting the app, try
-        // changing the primarySwatch below to Colors.green and then invoke
-        // "hot reload" (press "r" in the console where you ran "flutter run",
-        // or simply save your changes to "hot reload" in a Flutter IDE).
-        // Notice that the counter didn't reset back to zero; the application
-        // is not restarted.
         primarySwatch: Colors.blue,
       ),
-      home: RepositoryProvider(
-        create: (context) => AuthRepository(),
-        child: BlocProvider(
-          create: (context) => SessionCubit(authRepository: context.read<AuthRepository>()),
-            child: AppNavigator(),
-        ),
-      ),//const MyHomePage(title: 'Flutter Demo Home Page'),
-    );
+      home: _isAmplifyConfigured
+          ? MultiRepositoryProvider(
+              providers: [
+                RepositoryProvider(create: (context) => AuthRepository()),
+                RepositoryProvider(create: (context) => DataRepository()),
+                RepositoryProvider(create: (context) => StorageRepository()),
+              ],
+              child: MultiBlocProvider(providers: [
+                BlocProvider(
+                  create: (context) => SessionCubit(
+                    authRepository: context.read<AuthRepository>(),
+                    dataRepository: context.read<DataRepository>(),
+                  ),
+                ),
+                BlocProvider(
+                  create: (context) => ProfileBloc(
+                    storageRepository: context.read<StorageRepository>(),
+                    dataRepository: context.read<DataRepository>(),
+                    user: context.read<User>(),
+                    isCurrentUser: false,
+                  ),
+                ),
+
+                ],
+                child: AppNavigator(),
+              ),
+            )
+          : LoadingView()
+    );//const MyHomePage(title: 'Flutter Demo Home Page'),
   }
 
   Future<void> _configureAmplify() async {
     try {
+      print ('Configuring amplify...');
       await Amplify.addPlugins([
         AmplifyAuthCognito(),
         AmplifyDataStore(modelProvider: ModelProvider.instance),
         AmplifyAPI(),
         AmplifyStorageS3(),
-        AmplifyAnalyticsPinpoint(),
+        //AmplifyAnalyticsPinpoint(),
       ]);
 
       await Amplify.configure(amplifyconfig);

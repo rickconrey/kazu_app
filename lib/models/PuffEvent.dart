@@ -22,91 +22,105 @@
 import 'package:amplify_datastore_plugin_interface/amplify_datastore_plugin_interface.dart';
 import 'package:flutter/foundation.dart';
 
+
 /** This is an auto generated class representing the PuffEvent type in your schema. */
 @immutable
 class PuffEvent extends Model {
   static const classType = const _PuffEventModelType();
   final String id;
-  final String eventdata;
+  final String? _eventdata;
 
   @override
   getInstanceType() => classType;
-
+  
   @override
   String getId() {
     return id;
   }
-
-  const PuffEvent._internal({required this.id, required this.eventdata});
-
-  factory PuffEvent({required String id, required String eventdata}) {
-    return PuffEvent._internal(
-        id: id == null ? UUID.getUUID() : id, eventdata: eventdata);
+  
+  String? get eventdata {
+    return _eventdata;
   }
-
+  
+  const PuffEvent._internal({required this.id, eventdata}): _eventdata = eventdata;
+  
+  factory PuffEvent({String? id, String? eventdata}) {
+    return PuffEvent._internal(
+      id: id == null ? UUID.getUUID() : id,
+      eventdata: eventdata);
+  }
+  
   bool equals(Object other) {
     return this == other;
   }
-
+  
   @override
   bool operator ==(Object other) {
     if (identical(other, this)) return true;
-    return other is PuffEvent && id == other.id && eventdata == other.eventdata;
+    return other is PuffEvent &&
+      id == other.id &&
+      _eventdata == other._eventdata;
   }
-
+  
   @override
   int get hashCode => toString().hashCode;
-
+  
   @override
   String toString() {
     var buffer = new StringBuffer();
-
+    
     buffer.write("PuffEvent {");
     buffer.write("id=" + "$id" + ", ");
-    buffer.write("eventdata=" + "$eventdata");
+    buffer.write("eventdata=" + "$_eventdata");
     buffer.write("}");
-
+    
     return buffer.toString();
   }
-
+  
   PuffEvent copyWith({String? id, String? eventdata}) {
-    return PuffEvent(id: id ?? this.id, eventdata: eventdata ?? this.eventdata);
+    return PuffEvent(
+      id: id ?? this.id,
+      eventdata: eventdata ?? this.eventdata);
   }
-
-  PuffEvent.fromJson(Map<String, dynamic> json)
-      : id = json['id'],
-        eventdata = json['eventdata'];
-
-  Map<String, dynamic> toJson() => {'id': id, 'eventdata': eventdata};
+  
+  PuffEvent.fromJson(Map<String, dynamic> json)  
+    : id = json['id'],
+      _eventdata = json['eventdata'];
+  
+  Map<String, dynamic> toJson() => {
+    'id': id, 'eventdata': _eventdata
+  };
 
   static final QueryField ID = QueryField(fieldName: "puffEvent.id");
   static final QueryField EVENTDATA = QueryField(fieldName: "eventdata");
-  static var schema =
-      Model.defineSchema(define: (ModelSchemaDefinition modelSchemaDefinition) {
+  static var schema = Model.defineSchema(define: (ModelSchemaDefinition modelSchemaDefinition) {
     modelSchemaDefinition.name = "PuffEvent";
     modelSchemaDefinition.pluralName = "PuffEvents";
-
+    
     modelSchemaDefinition.authRules = [
-      AuthRule(authStrategy: AuthStrategy.PUBLIC, operations: [
-        ModelOperation.CREATE,
-        ModelOperation.UPDATE,
-        ModelOperation.DELETE,
-        ModelOperation.READ
-      ])
+      AuthRule(
+        authStrategy: AuthStrategy.PUBLIC,
+        operations: [
+          ModelOperation.CREATE,
+          ModelOperation.UPDATE,
+          ModelOperation.DELETE,
+          ModelOperation.READ
+        ])
     ];
-
+    
     modelSchemaDefinition.addField(ModelFieldDefinition.id());
-
+    
     modelSchemaDefinition.addField(ModelFieldDefinition.field(
-        key: PuffEvent.EVENTDATA,
-        isRequired: false,
-        ofType: ModelFieldType(ModelFieldTypeEnum.string)));
+      key: PuffEvent.EVENTDATA,
+      isRequired: false,
+      ofType: ModelFieldType(ModelFieldTypeEnum.string)
+    ));
   });
 }
 
 class _PuffEventModelType extends ModelType<PuffEvent> {
   const _PuffEventModelType();
-
+  
   @override
   PuffEvent fromJson(Map<String, dynamic> jsonData) {
     return PuffEvent.fromJson(jsonData);

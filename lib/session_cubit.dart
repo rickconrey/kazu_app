@@ -1,21 +1,39 @@
+import 'package:amplify_flutter/amplify.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:kazu_app/repositories/auth_repository.dart';
+import 'package:kazu_app/repositories/data_repository.dart';
 import 'package:kazu_app/session_state.dart';
 import 'package:kazu_app/states/auth_credentials.dart';
 
+import 'models/User.dart';
+
 class SessionCubit extends Cubit<SessionState> {
   final AuthRepository authRepository;
-  //final DataRepository dataRepository;
+  final DataRepository dataRepository;
 
-  SessionCubit({required this.authRepository}) : super(UnknownSessionState()) {
+  User get currentUser => (state as Authenticated).user;
+  User? get selectedUser => (state as Authenticated).selectedUser;
+  bool get isCurrentUserSelected =>
+      selectedUser == null || currentUser.id == selectedUser?.id;
+
+  SessionCubit({required this.authRepository, required this.dataRepository}) : super(UnknownSessionState()) {
     attemptAutoLogin();
   }
 
   void attemptAutoLogin() async {
     try {
       final userId = await authRepository.attemptAutoLogin();
-      // final user = dataRepo.getUser(userId);
-      final user = userId;
+
+      if (userId == null) {
+        throw Exception('User not logged in');
+      }
+
+      User user = await dataRepository.getUserById(userId) ??
+                  await dataRepository.createUser(
+                    userId: userId,
+                    username: 'User-${UUID()}',
+      );
+
       emit(Authenticated(user: user));
     } on Exception {
       emit(Unauthenticated());
@@ -23,10 +41,18 @@ class SessionCubit extends Cubit<SessionState> {
   }
   void showAuth() => emit(Unauthenticated());
 
-  void showSession(AuthCredentials credentials) {
-    //final user = dataRepository.getUser(credentials.userId);
-    final user = credentials.username;
-    emit(Authenticated(user: user));
+  void showSession(AuthCredentials credentials) async {
+    try {
+      User user = await dataRepository.getUserById(credentials.userId!) ??
+                  await dataRepository.createUser(
+                    userId: credentials.userId!,
+                    username: credentials.username,
+                    email: credentials.email,
+      );
+      emit(Authenticated(user: user));
+    } catch (e) {
+      rethrow;
+    }
   }
 
   void signOut() {
