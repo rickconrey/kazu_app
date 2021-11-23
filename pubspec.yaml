@@ -40,10 +40,11 @@ dependencies:
   amplify_datastore:
   amplify_storage_s3:
   amplify_api:
-  amplify_analytics_pinpoint:
 
   image_picker:
   cached_network_image:
+
+  permission_handler: ^8.3.0
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.

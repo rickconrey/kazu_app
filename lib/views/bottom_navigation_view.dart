@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:kazu_app/cubit/bottom_navigation_cubit.dart';
 import 'package:kazu_app/home_navigator.dart';
 import 'package:kazu_app/profile/profile_view.dart';
+import 'package:kazu_app/views/scan_view.dart';
 
 import 'home_view.dart';
 
@@ -17,7 +18,8 @@ class BottomNavigationView extends StatelessWidget {
           body: IndexedStack(
             index: state,
             children: [
-              HomeNavigator(),
+              ScanView(),
+              //HomeNavigator(),
               ProfileView(),
             ],
           ),
