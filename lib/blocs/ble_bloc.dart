@@ -4,8 +4,14 @@ import 'package:kazu_app/events/ble_event.dart';
 import 'package:kazu_app/repositories/ble_repository.dart';
 import 'package:kazu_app/states/ble_state.dart';
 
+import 'package:synchronized/synchronized.dart';
+
 class BleBloc extends Bloc<BleEvent, BleState> {
   final BleRepository bleRepository;
+  final Guid kazuServiceUuid = Guid("c6f9b530-b0b1-b2f4-5769-7469f5b2b1b0");
+  final Guid kazuTxUuid = Guid("c6f9b531-b0b1-b2f4-5769-7469f5b2b1b0");
+  final Guid kazuTxNotifyUuid = Guid("c6f9b532-b0b1-b2f4-5769-7469f5b2b1b0");
+  final Guid kazuRxUuid = Guid("c6f9b533-b0b1-b2f4-5769-7469f5b2b1b0");
 
   BleBloc({required this.bleRepository}) : super (BleState());
 
@@ -14,7 +20,6 @@ class BleBloc extends Bloc<BleEvent, BleState> {
     if (event is BleScanRequest) {
       List<ScanResult> scanResults = [];
       yield state.copyWith(scanResults: scanResults);
-      //bleRepository.scanForDevices(const Duration(seconds: 4));
       var scanListener = bleRepository.ble.scan(withServices: [Guid("8D53DC1D-1DB7-4CD3-868B-8A527460AA84")], timeout: const Duration(seconds: 4)).listen((result) {
         add(BleScanResult(result: result));
       });
@@ -23,21 +28,62 @@ class BleBloc extends Bloc<BleEvent, BleState> {
       List<ScanResult> results = state.scanResults ?? [];
       results.add(event.result!);
       yield state.copyWith(scanResults: results);
+
     } else if (event is BleConnectRequest) {
       yield state.copyWith(device: event.device.device);
       await state.device?.connect();
       List<BluetoothService>? services = await state.device?.discoverServices();
+      for (BluetoothService service in services!) {
+        if (service.uuid == kazuServiceUuid) {
+          print("Found kazu service: $kazuServiceUuid");
+          for (BluetoothCharacteristic characteristic in service.characteristics) {
+            if (characteristic.uuid == kazuRxUuid) {
+              print("Found kazu Rx");
+              yield state.copyWith(rx: characteristic);
+            } else if (characteristic.uuid == kazuTxNotifyUuid) {
+              print("Found kazu RxNotify");
+              yield state.copyWith(txNotify: characteristic);
+            } else if (characteristic.uuid == kazuTxUuid) {
+              print("Found kazu Tx");
+              yield state.copyWith(tx: characteristic);
+            }
+          }
+        }
+      }
       yield state.copyWith(services: services);
-      add(BleConnected());
-    } else if (event is BleConnected) {
 
+      add(BleConnected());
+
+    } else if (event is BleConnected) {
+      yield state.copyWith(isConnected: true);
+
+      //state.device?.requestMtu(42);
+      //var mtu = await state.device?.mtu.first;
+      //print("MTU: $mtu");
+      //state.device?.requestMtu(512);
+      //mtu = await state.device?.mtu.first;
+      //print("MTU: $mtu");
+
+      Future.delayed(const Duration(seconds:1));
+
+      await state.txNotify?.setNotifyValue(true);
+      state.txNotify?.value.listen((value) async {
+        if (value.isNotEmpty) {
+          if (state.tx != null) {
+            bleRepository.readFromDevice(state.tx!, state.bleLock);
+          }
+        }
+      });
     } else if (event is BleTx) {
       try {
-
+        if (event.message != null) {
+          state.rx?.write(event.message!);
+        }
       } catch (e) {
         rethrow;
       }
+    } else if (event is BleDisconnected) {
+      state.txNotify?.setNotifyValue(false);
     }
-
   }
 }
