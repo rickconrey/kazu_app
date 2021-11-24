@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 
 import 'cobs.dart';
+import 'package:kazu_app/generated/telemetry.pb.dart';
 
 class Packet {
   static const int streamIdMask = 0x03;
@@ -104,6 +105,8 @@ class ProcessPacket {
        Cobs cobs = Cobs();
        List<int> results = cobs.decode(data);
        print("Cobs decoded: $results");
+       Telemetry telemetry = Telemetry.fromBuffer(results);
+       print(telemetry);
       } else {
         print("Error, invalid transaction");
       }
