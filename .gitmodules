@@ -1,0 +1,3 @@
+[submodule "witi-nanopb"]
+	path = protobuf
+	url = git@github.com:rickconrey/witi-nanopb.git
