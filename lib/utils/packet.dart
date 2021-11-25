@@ -70,7 +70,7 @@ class ProcessPacket {
 
   ProcessPacket() : super();
 
-  void processPacket(Packet packet) {
+  List<int>? processPacket(Packet packet) {
     if (packet.transactionType == 0) {
       transactionId = packet.transactionId;
       streamId = packet.streamId;
@@ -101,14 +101,12 @@ class ProcessPacket {
     if (data.length == bufferSize) {
       if (packet.transactionType == 2 || packet.transactionType == 0) {
        print("Found complete packet of size $bufferSize");
-       print("Decode: $data");
-       Cobs cobs = Cobs();
-       List<int> results = cobs.decode(data);
-       print("Cobs decoded: $results");
-       Telemetry telemetry = Telemetry.fromBuffer(results);
-       print(telemetry);
+       List<int> result = List.from(data);
+       reset();
+       return result;
       } else {
         print("Error, invalid transaction");
+        reset();
       }
       data.clear();
       reset();
@@ -117,6 +115,7 @@ class ProcessPacket {
       data.clear();
       reset();
     }
+    return null;
   }
 
   void reset() {

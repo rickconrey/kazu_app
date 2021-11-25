@@ -57,8 +57,7 @@ class ProfileView extends StatelessWidget {
             if (state.isCurrentUser)
               IconButton(
                 icon: const Icon(Icons.logout),
-                onPressed: () {},
-                //onPressed: () => context.read<ProfileBloc>().add(ChangeAvatarRequest()),
+                onPressed: () => context.read<SessionCubit>().signOut(),
               ),
           ],
         );

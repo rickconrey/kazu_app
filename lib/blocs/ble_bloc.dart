@@ -1,19 +1,24 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_blue/flutter_blue.dart';
 import 'package:kazu_app/events/ble_event.dart';
+import 'package:kazu_app/generated/telemetry.pb.dart';
 import 'package:kazu_app/repositories/ble_repository.dart';
+import 'package:kazu_app/repositories/data_repository.dart';
 import 'package:kazu_app/states/ble_state.dart';
-
-import 'package:synchronized/synchronized.dart';
+import 'package:kazu_app/utils/cobs.dart';
 
 class BleBloc extends Bloc<BleEvent, BleState> {
   final BleRepository bleRepository;
+  final DataRepository dataRepository;
   final Guid kazuServiceUuid = Guid("c6f9b530-b0b1-b2f4-5769-7469f5b2b1b0");
   final Guid kazuTxUuid = Guid("c6f9b531-b0b1-b2f4-5769-7469f5b2b1b0");
   final Guid kazuTxNotifyUuid = Guid("c6f9b532-b0b1-b2f4-5769-7469f5b2b1b0");
   final Guid kazuRxUuid = Guid("c6f9b533-b0b1-b2f4-5769-7469f5b2b1b0");
 
-  BleBloc({required this.bleRepository}) : super (BleState());
+  BleBloc({
+    required this.bleRepository,
+    required this.dataRepository,
+  }) : super (BleState());
 
   @override
   Stream<BleState> mapEventToState(BleEvent event) async* {
@@ -64,13 +69,23 @@ class BleBloc extends Bloc<BleEvent, BleState> {
       //mtu = await state.device?.mtu.first;
       //print("MTU: $mtu");
 
-      Future.delayed(const Duration(seconds:1));
-
       await state.txNotify?.setNotifyValue(true);
       state.txNotify?.value.listen((value) async {
         if (value.isNotEmpty) {
           if (state.tx != null) {
-            bleRepository.readFromDevice(state.tx!, state.bleLock);
+            List<int>? data = await bleRepository.readFromDevice(state.tx!, state.bleLock);
+            if (data != null) {
+              Cobs cobs = Cobs();
+              List<int> results = cobs.decode(data);
+              Telemetry telemetry = Telemetry.fromBuffer(results);
+              print(telemetry);
+              if (telemetry.whichPayload() == Telemetry_Payload.puffEvent) {
+                dataRepository.createPuffEvent(
+                    userId: "0",
+                    telemetry: telemetry,
+                );
+              }
+            }
           }
         }
       });
@@ -84,6 +99,10 @@ class BleBloc extends Bloc<BleEvent, BleState> {
       }
     } else if (event is BleDisconnected) {
       state.txNotify?.setNotifyValue(false);
+      if (state.device != null) {
+        bleRepository.disconnectFromDevice(state.device!);
+        yield state.copyWith(isConnected: false);
+      }
     }
   }
 }

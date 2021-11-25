@@ -79,6 +79,7 @@ class _AppState extends State<KazuApp> {
                   BlocProvider(
                       create: (context) => BleBloc(
                         bleRepository: context.read<BleRepository>(),
+                        dataRepository: context.read<DataRepository>(),
                       ),
                   ),
                 ],

@@ -2,11 +2,13 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:kazu_app/cubit/bottom_navigation_cubit.dart';
-import 'package:kazu_app/home_navigator.dart';
+import 'package:kazu_app/feed_navigator.dart';
 import 'package:kazu_app/profile/profile_view.dart';
 import 'package:kazu_app/views/scan_view.dart';
+import 'package:kazu_app/views/today_view.dart';
 
-import 'home_view.dart';
+import '../home_navigator.dart';
+import 'feed_view.dart';
 
 class BottomNavigationView extends StatelessWidget {
   @override
@@ -18,9 +20,10 @@ class BottomNavigationView extends StatelessWidget {
           body: IndexedStack(
             index: state,
             children: [
-              ScanView(),
-              //HomeNavigator(),
-              ProfileView(),
+              //ScanView(),
+              HomeNavigator(),
+              FeedNavigator(),
+              //ProfileView(),
             ],
           ),
           bottomNavigationBar: BottomNavigationBar(
@@ -33,9 +36,9 @@ class BottomNavigationView extends StatelessWidget {
 
               ),
               BottomNavigationBarItem(
-                icon: Icon(Icons.person),
-                label: "Profile",
-              )
+                icon: Icon(Icons.forum),
+                label: "Feed",
+              ),
             ],
           ),
         );

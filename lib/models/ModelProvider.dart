@@ -20,21 +20,27 @@
 // ignore_for_file: public_member_api_docs, file_names, unnecessary_new, prefer_if_null_operators, prefer_const_constructors, slash_for_doc_comments, annotate_overrides, non_constant_identifier_names, unnecessary_string_interpolations, prefer_adjacent_string_concatenation, unnecessary_const, dead_code
 
 import 'package:amplify_datastore_plugin_interface/amplify_datastore_plugin_interface.dart';
+import 'PuffEvent.dart';
 import 'User.dart';
 
+export 'PuffEvent.dart';
 export 'User.dart';
 
 class ModelProvider implements ModelProviderInterface {
   @override
-  String version = "320f6bf0d07c7e4eb45d212ce3181234";
+  String version = "b124fb88fcbe56882abdf548e4ab7eaf";
   @override
-  List<ModelSchema> modelSchemas = [User.schema];
+  List<ModelSchema> modelSchemas = [PuffEvent.schema, User.schema];
   static final ModelProvider _instance = ModelProvider();
 
   static ModelProvider get instance => _instance;
   
   ModelType getModelTypeByModelName(String modelName) {
     switch(modelName) {
+    case "PuffEvent": {
+    return PuffEvent.classType;
+    }
+    break;
     case "User": {
     return User.classType;
     }

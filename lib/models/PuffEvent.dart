@@ -28,7 +28,13 @@ import 'package:flutter/foundation.dart';
 class PuffEvent extends Model {
   static const classType = const _PuffEventModelType();
   final String id;
-  final String? _eventdata;
+  final String? _userId;
+  final TemporalTimestamp? _time;
+  final String? _json;
+  final String? _cartridgeId;
+  final String? _deviceId;
+  final int? _duration;
+  final int? _doseNumber;
 
   @override
   getInstanceType() => classType;
@@ -38,16 +44,46 @@ class PuffEvent extends Model {
     return id;
   }
   
-  String? get eventdata {
-    return _eventdata;
+  String? get userId {
+    return _userId;
   }
   
-  const PuffEvent._internal({required this.id, eventdata}): _eventdata = eventdata;
+  TemporalTimestamp? get time {
+    return _time;
+  }
   
-  factory PuffEvent({String? id, String? eventdata}) {
+  String? get json {
+    return _json;
+  }
+  
+  String? get cartridgeId {
+    return _cartridgeId;
+  }
+  
+  String? get deviceId {
+    return _deviceId;
+  }
+  
+  int? get duration {
+    return _duration;
+  }
+  
+  int? get doseNumber {
+    return _doseNumber;
+  }
+  
+  const PuffEvent._internal({required this.id, userId, time, json, cartridgeId, deviceId, duration, doseNumber}): _userId = userId, _time = time, _json = json, _cartridgeId = cartridgeId, _deviceId = deviceId, _duration = duration, _doseNumber = doseNumber;
+  
+  factory PuffEvent({String? id, String? userId, TemporalTimestamp? time, String? json, String? cartridgeId, String? deviceId, int? duration, int? doseNumber}) {
     return PuffEvent._internal(
       id: id == null ? UUID.getUUID() : id,
-      eventdata: eventdata);
+      userId: userId,
+      time: time,
+      json: json,
+      cartridgeId: cartridgeId,
+      deviceId: deviceId,
+      duration: duration,
+      doseNumber: doseNumber);
   }
   
   bool equals(Object other) {
@@ -59,7 +95,13 @@ class PuffEvent extends Model {
     if (identical(other, this)) return true;
     return other is PuffEvent &&
       id == other.id &&
-      _eventdata == other._eventdata;
+      _userId == other._userId &&
+      _time == other._time &&
+      _json == other._json &&
+      _cartridgeId == other._cartridgeId &&
+      _deviceId == other._deviceId &&
+      _duration == other._duration &&
+      _doseNumber == other._doseNumber;
   }
   
   @override
@@ -71,28 +113,52 @@ class PuffEvent extends Model {
     
     buffer.write("PuffEvent {");
     buffer.write("id=" + "$id" + ", ");
-    buffer.write("eventdata=" + "$_eventdata");
+    buffer.write("userId=" + "$_userId" + ", ");
+    buffer.write("time=" + (_time != null ? _time!.toString() : "null") + ", ");
+    buffer.write("json=" + "$_json" + ", ");
+    buffer.write("cartridgeId=" + "$_cartridgeId" + ", ");
+    buffer.write("deviceId=" + "$_deviceId" + ", ");
+    buffer.write("duration=" + (_duration != null ? _duration!.toString() : "null") + ", ");
+    buffer.write("doseNumber=" + (_doseNumber != null ? _doseNumber!.toString() : "null"));
     buffer.write("}");
     
     return buffer.toString();
   }
   
-  PuffEvent copyWith({String? id, String? eventdata}) {
+  PuffEvent copyWith({String? id, String? userId, TemporalTimestamp? time, String? json, String? cartridgeId, String? deviceId, int? duration, int? doseNumber}) {
     return PuffEvent(
       id: id ?? this.id,
-      eventdata: eventdata ?? this.eventdata);
+      userId: userId ?? this.userId,
+      time: time ?? this.time,
+      json: json ?? this.json,
+      cartridgeId: cartridgeId ?? this.cartridgeId,
+      deviceId: deviceId ?? this.deviceId,
+      duration: duration ?? this.duration,
+      doseNumber: doseNumber ?? this.doseNumber);
   }
   
   PuffEvent.fromJson(Map<String, dynamic> json)  
     : id = json['id'],
-      _eventdata = json['eventdata'];
+      _userId = json['userId'],
+      _time = json['time'] != null ? TemporalTimestamp.fromSeconds(json['time']) : null,
+      _json = json['json'],
+      _cartridgeId = json['cartridgeId'],
+      _deviceId = json['deviceId'],
+      _duration = (json['duration'] as num?)?.toInt(),
+      _doseNumber = (json['doseNumber'] as num?)?.toInt();
   
   Map<String, dynamic> toJson() => {
-    'id': id, 'eventdata': _eventdata
+    'id': id, 'userId': _userId, 'time': _time?.toSeconds(), 'json': _json, 'cartridgeId': _cartridgeId, 'deviceId': _deviceId, 'duration': _duration, 'doseNumber': _doseNumber
   };
 
   static final QueryField ID = QueryField(fieldName: "puffEvent.id");
-  static final QueryField EVENTDATA = QueryField(fieldName: "eventdata");
+  static final QueryField USERID = QueryField(fieldName: "userId");
+  static final QueryField TIME = QueryField(fieldName: "time");
+  static final QueryField JSON = QueryField(fieldName: "json");
+  static final QueryField CARTRIDGEID = QueryField(fieldName: "cartridgeId");
+  static final QueryField DEVICEID = QueryField(fieldName: "deviceId");
+  static final QueryField DURATION = QueryField(fieldName: "duration");
+  static final QueryField DOSENUMBER = QueryField(fieldName: "doseNumber");
   static var schema = Model.defineSchema(define: (ModelSchemaDefinition modelSchemaDefinition) {
     modelSchemaDefinition.name = "PuffEvent";
     modelSchemaDefinition.pluralName = "PuffEvents";
@@ -111,9 +177,45 @@ class PuffEvent extends Model {
     modelSchemaDefinition.addField(ModelFieldDefinition.id());
     
     modelSchemaDefinition.addField(ModelFieldDefinition.field(
-      key: PuffEvent.EVENTDATA,
+      key: PuffEvent.USERID,
       isRequired: false,
       ofType: ModelFieldType(ModelFieldTypeEnum.string)
+    ));
+    
+    modelSchemaDefinition.addField(ModelFieldDefinition.field(
+      key: PuffEvent.TIME,
+      isRequired: false,
+      ofType: ModelFieldType(ModelFieldTypeEnum.timestamp)
+    ));
+    
+    modelSchemaDefinition.addField(ModelFieldDefinition.field(
+      key: PuffEvent.JSON,
+      isRequired: false,
+      ofType: ModelFieldType(ModelFieldTypeEnum.string)
+    ));
+    
+    modelSchemaDefinition.addField(ModelFieldDefinition.field(
+      key: PuffEvent.CARTRIDGEID,
+      isRequired: false,
+      ofType: ModelFieldType(ModelFieldTypeEnum.string)
+    ));
+    
+    modelSchemaDefinition.addField(ModelFieldDefinition.field(
+      key: PuffEvent.DEVICEID,
+      isRequired: false,
+      ofType: ModelFieldType(ModelFieldTypeEnum.string)
+    ));
+    
+    modelSchemaDefinition.addField(ModelFieldDefinition.field(
+      key: PuffEvent.DURATION,
+      isRequired: false,
+      ofType: ModelFieldType(ModelFieldTypeEnum.int)
+    ));
+    
+    modelSchemaDefinition.addField(ModelFieldDefinition.field(
+      key: PuffEvent.DOSENUMBER,
+      isRequired: false,
+      ofType: ModelFieldType(ModelFieldTypeEnum.int)
     ));
   });
 }

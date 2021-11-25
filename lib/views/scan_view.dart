@@ -9,27 +9,27 @@ import 'package:kazu_app/states/ble_state.dart';
 class ScanView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) => BleBloc(
-        bleRepository: context.read<BleRepository>(),
-      ),
-      child: BlocBuilder<BleBloc, BleState>(builder: (context,state) {
+    return BlocBuilder<BleBloc, BleState>(builder: (context, state) {
         return Scaffold(
           appBar: AppBar(
             title: Text("Find devices"),
           ),
           body: SingleChildScrollView(
             child: Column(
-              children: state.scanResults != null
-              ? [
-                ...state.scanResults!.map((item) {
-                  return ScanResultTile(
-                    result: item,
-                    onTap: () => context.read<BleBloc>().add(BleConnectRequest(device: item)),
-                  );
-                }),
-              ]
-              : []
+                children: state.scanResults != null
+                    ? [
+                  ...state.scanResults!.map((item) {
+                    return ScanResultTile(
+                      result: item,
+                      onTap: () =>
+                      state.isConnected == false
+                          ? context.read<BleBloc>().add(BleConnectRequest(
+                          device: item))
+                          : context.read<BleBloc>().add(BleDisconnected()),
+                    );
+                  }),
+                ]
+                    : []
             ),
           ),
           floatingActionButton: FloatingActionButton(
@@ -37,8 +37,9 @@ class ScanView extends StatelessWidget {
             onPressed: () => context.read<BleBloc>().add(BleScanRequest()),
           ),
         );
-      }),
-    );
+        //}),
+
+      });
   }
 }
 

@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:kazu_app/cubit/feed_navigator_cubit.dart';
 
-class HomeView extends StatelessWidget {
+class FeedView extends StatelessWidget {
   final _dummyAvatar =
       'https://getwiti.com/wp-content/uploads/2019/07/witi_logo.png';
   final _dummyImage =

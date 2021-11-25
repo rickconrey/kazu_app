@@ -53,7 +53,7 @@ class BleRepository {
     await device.disconnect();
   }
 
-  Future<void> readFromDevice(BluetoothCharacteristic rx, Lock lock) async {
+  Future<List<int>?> readFromDevice(BluetoothCharacteristic rx, Lock lock) async {
     if(rx.properties.read) {
       print("Reading data");
       List<int> values = [];
@@ -64,10 +64,12 @@ class BleRepository {
       if (values.length > 4) {
         Packet packet = Packet();
         packet.processRx(values);
-        processPacket.processPacket(packet);
+        List<int>? results = processPacket.processPacket(packet);
+        return results;
       }
     } else {
       print("No read property found.");
     }
+    return null;
   }
 }

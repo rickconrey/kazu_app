@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:kazu_app/profile/profile_view.dart';
 import 'package:kazu_app/views/comments_view.dart';
-import 'package:kazu_app/views/home_view.dart';
+import 'package:kazu_app/views/feed_view.dart';
 
-import 'cubit/home_navigator_cubit.dart';
+import 'cubit/feed_navigator_cubit.dart';
 
 class FeedNavigator extends StatelessWidget {
   @override
@@ -19,7 +19,7 @@ class FeedNavigator extends StatelessWidget {
                 return route.didPop(result);
               },
               pages: [
-                MaterialPage(child: (HomeView())),
+                MaterialPage(child: (FeedView())),
                 if (state == FeedNavigatorState.profile)
                   MaterialPage(child: ProfileView()),
                 if (state == FeedNavigatorState.comments)

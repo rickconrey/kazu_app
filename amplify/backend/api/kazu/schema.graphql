@@ -1,3 +1,14 @@
+type PuffEvent @model @auth(rules: [{allow: public}]) {
+  id: ID!
+  userId: ID
+  time: AWSTimestamp
+  json: AWSJSON
+  cartridgeId: String
+  deviceId: String
+  duration: Int
+  doseNumber: Int
+}
+
 type User @model @auth(rules: [{allow: public}]) {
   id: ID!
   username: String
@@ -6,3 +17,4 @@ type User @model @auth(rules: [{allow: public}]) {
   description: String
   dateCreated: AWSDateTime
 }
+ 
