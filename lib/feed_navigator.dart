@@ -4,7 +4,7 @@ import 'package:kazu_app/profile/profile_view.dart';
 import 'package:kazu_app/views/comments_view.dart';
 import 'package:kazu_app/views/home_view.dart';
 
-import 'cubit/feed_navigator_cubit.dart';
+import 'cubit/home_navigator_cubit.dart';
 
 class FeedNavigator extends StatelessWidget {
   @override

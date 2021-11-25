@@ -1,7 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:kazu_app/cubit/home_navigator_cubit.dart';
+import 'package:kazu_app/cubit/feed_navigator_cubit.dart';
 
 class HomeView extends StatelessWidget {
   final _dummyAvatar =
@@ -21,7 +21,7 @@ class HomeView extends StatelessWidget {
   Widget _postAuthorRow(BuildContext context) {
     const double avatarDiameter = 44;
     return GestureDetector(
-      onTap: () => BlocProvider.of<HomeNavigatorCubit>(context).showProfile(),
+      onTap: () => BlocProvider.of<FeedNavigatorCubit>(context).showProfile(),
       child: Row(
         children: [
           Padding(
@@ -91,7 +91,7 @@ class HomeView extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 8),
       child: GestureDetector(
-        onTap: () => BlocProvider.of<HomeNavigatorCubit>(context).showComments(),
+        onTap: () => BlocProvider.of<FeedNavigatorCubit>(context).showComments(),
         child: const Text(
           'View Comments',
           style: TextStyle(fontWeight: FontWeight.w200),
