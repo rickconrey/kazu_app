@@ -79,13 +79,16 @@ class BleBloc extends Bloc<BleEvent, BleState> {
               Cobs cobs = Cobs();
               List<int> results = cobs.decode(data);
               Telemetry telemetry = Telemetry.fromBuffer(results);
-              print(telemetry);
-              if (telemetry.whichPayload() == Telemetry_Payload.puffEvent) {
-                dataRepository.createPuffEvent(
-                    userId: state.user?.id ?? "0",
-                    telemetry: telemetry,
-                );
-              }
+              dataRepository.createEvent(
+                userId: state.user?.id ?? "0",
+                telemetry: telemetry,
+              );
+              //if (telemetry.whichPayload() == Telemetry_Payload.puffEvent) {
+              //  dataRepository.createPuffEvent(
+              //      userId: state.user?.id ?? "0",
+              //      telemetry: telemetry,
+              //  );
+              //}
             }
           }
         }
