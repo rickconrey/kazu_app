@@ -1,4 +1,5 @@
 import 'package:flutter_blue/flutter_blue.dart';
+import 'package:kazu_app/models/User.dart';
 
 abstract class BleEvent {}
 
@@ -12,8 +13,9 @@ class BleScanRequest extends BleEvent {}
 
 class BleConnectRequest extends BleEvent {
   final ScanResult device;
+  final User user;
 
-  BleConnectRequest({required this.device});
+  BleConnectRequest({required this.device, required this.user});
 }
 
 class BleConnected extends BleEvent {}

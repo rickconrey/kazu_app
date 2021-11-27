@@ -1,9 +1,11 @@
 import 'dart:async';
 
 import 'package:flutter_blue/flutter_blue.dart';
+import 'package:kazu_app/models/User.dart';
 import 'package:synchronized/synchronized.dart';
 
 class BleState {
+  final User? user;
   final ScanResult? result;
   final BluetoothDevice? device;
   final List<BluetoothService>? services;
@@ -17,6 +19,7 @@ class BleState {
 
   List<ScanResult>? scanResults = [];
   BleState({
+    this.user,
     this.result,
     this.scanResults,
     this.device,
@@ -28,6 +31,7 @@ class BleState {
   });
 
   BleState copyWith({
+    User? user,
     ScanResult? result,
     List<ScanResult>? scanResults,
     BluetoothDevice? device,
@@ -38,6 +42,7 @@ class BleState {
     bool? isConnected,
   }) {
     return BleState(
+      user: user ?? this.user,
       result: result ?? this.result,
       scanResults: scanResults ?? this.scanResults,
       device: device ?? this.device,

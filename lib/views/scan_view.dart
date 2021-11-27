@@ -3,43 +3,49 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_blue/flutter_blue.dart';
 import 'package:kazu_app/blocs/ble_bloc.dart';
 import 'package:kazu_app/events/ble_event.dart';
+import 'package:kazu_app/models/User.dart';
 import 'package:kazu_app/repositories/ble_repository.dart';
 import 'package:kazu_app/states/ble_state.dart';
+
+import '../session_cubit.dart';
 
 class ScanView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final sessionCubit = context.read<SessionCubit>();
     return BlocBuilder<BleBloc, BleState>(builder: (context, state) {
-        return Scaffold(
-          appBar: AppBar(
-            title: Text("Find devices"),
+      return Scaffold(
+        appBar: AppBar(
+          title: Text("Find devices"),
+        ),
+        body: SingleChildScrollView(
+          child: Column(
+              children: state.scanResults != null
+                  ? [
+                ...state.scanResults!.map((item) {
+                  return ScanResultTile(
+                    result: item,
+                    onTap: () =>
+                    state.isConnected == false
+                        ? context.read<BleBloc>().add(
+                          BleConnectRequest(
+                            device: item,
+                            user: sessionCubit.currentUser,
+                          )
+                        )
+                        : context.read<BleBloc>().add(BleDisconnected()),
+                  );
+                }),
+              ]
+                  : []
           ),
-          body: SingleChildScrollView(
-            child: Column(
-                children: state.scanResults != null
-                    ? [
-                  ...state.scanResults!.map((item) {
-                    return ScanResultTile(
-                      result: item,
-                      onTap: () =>
-                      state.isConnected == false
-                          ? context.read<BleBloc>().add(BleConnectRequest(
-                          device: item))
-                          : context.read<BleBloc>().add(BleDisconnected()),
-                    );
-                  }),
-                ]
-                    : []
-            ),
-          ),
-          floatingActionButton: FloatingActionButton(
-            child: Icon(Icons.search),
-            onPressed: () => context.read<BleBloc>().add(BleScanRequest()),
-          ),
-        );
-        //}),
-
-      });
+        ),
+        floatingActionButton: FloatingActionButton(
+          child: Icon(Icons.search),
+          onPressed: () => context.read<BleBloc>().add(BleScanRequest()),
+        ),
+      );
+    });
   }
 }
 

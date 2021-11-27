@@ -17,7 +17,11 @@ class TodayView extends StatelessWidget{
         ),
       ),
       body: Column(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
+          const Placeholder(
+            fallbackHeight: 500,
+          ),
           _buildEventStream(context),
           _deviceButton(context),
         ],
@@ -42,13 +46,11 @@ class TodayView extends StatelessWidget{
         }
         print("${snapshot.data!.items.length}");
         return SizedBox(
-          height: 200,
+          height: 400,
           child: ListView(
           children: snapshot.data!.items.map((item) {
             return Center(
-              child: Container(
-                child: Text("${item.duration}"),
-              ),
+              child: _buildEventCard(item),
             );
           }).toList(),
         ),
@@ -57,22 +59,33 @@ class TodayView extends StatelessWidget{
     );
   }
 
-  Widget _buildEventsList() {
-    return ListView.builder(
-      itemCount: 5,
-      itemBuilder: (context, index) {
-        return _eventsView(context);
-      }
+  Widget _buildEventCard(PuffEvent event) {
+    var dateTime = DateTime.fromMillisecondsSinceEpoch(event.time!.toSeconds() * 1000);
+    return Card(
+      margin: const EdgeInsets.symmetric(vertical: 5, horizontal: 30),
+      child: ListTile(
+        leading: const Icon(Icons.whatshot),
+        //leading: const Icon(Icons.bolt),
+        title: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            const Text("Puff Event"),
+            Text("$dateTime"),
+          ]
+        ),
+        subtitle: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            Text("Dose Number: ${event.doseNumber}"),
+            Text("Duration: ${event.duration}"),
+            const Text("Amount: "),
+          ],
+        ),
+      ),
     );
   }
 
-  Widget _eventsView(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text("Event"),
-      ],
-    );
-  }
-
+  //Widget _buildPuffEventCard(PuffEvent event) {
+  //
+  //}
 }

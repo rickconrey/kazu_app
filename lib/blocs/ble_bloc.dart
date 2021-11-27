@@ -2,6 +2,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_blue/flutter_blue.dart';
 import 'package:kazu_app/events/ble_event.dart';
 import 'package:kazu_app/generated/telemetry.pb.dart';
+import 'package:kazu_app/models/User.dart';
 import 'package:kazu_app/repositories/ble_repository.dart';
 import 'package:kazu_app/repositories/data_repository.dart';
 import 'package:kazu_app/states/ble_state.dart';
@@ -35,7 +36,7 @@ class BleBloc extends Bloc<BleEvent, BleState> {
       yield state.copyWith(scanResults: results);
 
     } else if (event is BleConnectRequest) {
-      yield state.copyWith(device: event.device.device);
+      yield state.copyWith(device: event.device.device, user: event.user);
       await state.device?.connect();
       List<BluetoothService>? services = await state.device?.discoverServices();
       for (BluetoothService service in services!) {
@@ -81,7 +82,7 @@ class BleBloc extends Bloc<BleEvent, BleState> {
               print(telemetry);
               if (telemetry.whichPayload() == Telemetry_Payload.puffEvent) {
                 dataRepository.createPuffEvent(
-                    userId: "0",
+                    userId: state.user?.id ?? "0",
                     telemetry: telemetry,
                 );
               }

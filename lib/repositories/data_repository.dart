@@ -41,7 +41,7 @@ class DataRepository {
   Future<PuffEvent> createPuffEvent({required String userId, required Telemetry telemetry}) async {
     try {
       if (telemetry.whichPayload() == Telemetry_Payload.puffEvent) {
-        String json = telemetry.writeToJson();
+        String json = jsonEncode(telemetry.toProto3Json());
         TemporalTimestamp time = TemporalTimestamp.fromSeconds(
             telemetry.time);
         List<int> cartridgeId = telemetry.puffEvent.cartridgeId;
