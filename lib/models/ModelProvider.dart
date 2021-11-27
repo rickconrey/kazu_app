@@ -20,25 +20,43 @@
 // ignore_for_file: public_member_api_docs, file_names, unnecessary_new, prefer_if_null_operators, prefer_const_constructors, slash_for_doc_comments, annotate_overrides, non_constant_identifier_names, unnecessary_string_interpolations, prefer_adjacent_string_concatenation, unnecessary_const, dead_code
 
 import 'package:amplify_datastore_plugin_interface/amplify_datastore_plugin_interface.dart';
+import 'CartridgeEvent.dart';
+import 'ChargeEvent.dart';
 import 'PuffEvent.dart';
+import 'ResetEvent.dart';
 import 'User.dart';
 
+export 'CartridgeEvent.dart';
+export 'ChargeEvent.dart';
 export 'PuffEvent.dart';
+export 'ResetEvent.dart';
 export 'User.dart';
 
 class ModelProvider implements ModelProviderInterface {
   @override
-  String version = "b124fb88fcbe56882abdf548e4ab7eaf";
+  String version = "0435c09110bde471582e0bd0fd2af3f1";
   @override
-  List<ModelSchema> modelSchemas = [PuffEvent.schema, User.schema];
+  List<ModelSchema> modelSchemas = [CartridgeEvent.schema, ChargeEvent.schema, PuffEvent.schema, ResetEvent.schema, User.schema];
   static final ModelProvider _instance = ModelProvider();
 
   static ModelProvider get instance => _instance;
   
   ModelType getModelTypeByModelName(String modelName) {
     switch(modelName) {
+    case "CartridgeEvent": {
+    return CartridgeEvent.classType;
+    }
+    break;
+    case "ChargeEvent": {
+    return ChargeEvent.classType;
+    }
+    break;
     case "PuffEvent": {
     return PuffEvent.classType;
+    }
+    break;
+    case "ResetEvent": {
+    return ResetEvent.classType;
     }
     break;
     case "User": {

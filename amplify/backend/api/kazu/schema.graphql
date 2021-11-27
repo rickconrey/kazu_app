@@ -1,3 +1,36 @@
+type CartridgeEvent @model @auth(rules: [{allow: public}]) {
+  id: ID!
+  time: AWSTimestamp
+  deviceId: String
+  userId: ID
+  cartridgeId: String
+  attached: Boolean
+  position: Int
+  doseNumber: Int
+  measuredResistance: Int
+  empty: Boolean
+  json: AWSJSON
+}
+
+type ChargeEvent @model @auth(rules: [{allow: public}]) {
+  id: ID!
+  time: AWSTimestamp
+  charging: Boolean
+  adcVbat: Int
+  json: AWSJSON
+  userId: ID
+  deviceId: String
+}
+
+type ResetEvent @model @auth(rules: [{allow: public}]) {
+  id: ID!
+  time: AWSTimestamp
+  reason: String
+  json: AWSJSON
+  userId: ID
+  deviceId: String
+}
+
 type PuffEvent @model @auth(rules: [{allow: public}]) {
   id: ID!
   userId: ID
@@ -7,6 +40,7 @@ type PuffEvent @model @auth(rules: [{allow: public}]) {
   deviceId: String
   duration: Int
   doseNumber: Int
+  amount: Int
 }
 
 type User @model @auth(rules: [{allow: public}]) {
