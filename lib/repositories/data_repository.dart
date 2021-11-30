@@ -8,6 +8,7 @@ import 'package:kazu_app/models/ChargeEvent.dart';
 import 'package:kazu_app/models/ResetEvent.dart';
 import 'package:kazu_app/models/CartridgeEvent.dart';
 import 'package:kazu_app/models/User.dart';
+import 'package:rxdart/rxdart.dart';
 
 class DataRepository {
   Future<User?> getUserById(String userId) async {
@@ -202,5 +203,52 @@ class DataRepository {
       PuffEvent.classType,
       sortBy: [PuffEvent.TIME.descending()],
     );
+  }
+
+  Stream<QuerySnapshot<ResetEvent>> resetEventStream() {
+    return Amplify.DataStore.observeQuery(
+      ResetEvent.classType,
+      sortBy: [ResetEvent.TIME.descending()],
+    );
+  }
+
+  Stream<QuerySnapshot<CartridgeEvent>> cartridgeEventStream() {
+    return Amplify.DataStore.observeQuery(
+      CartridgeEvent.classType,
+      sortBy: [CartridgeEvent.TIME.descending()],
+    );
+  }
+
+  Stream<QuerySnapshot<ChargeEvent>> chargeEventStream() {
+    return Amplify.DataStore.observeQuery(
+      ChargeEvent.classType,
+      sortBy: [ChargeEvent.TIME.descending()],
+    );
+  }
+
+  Stream<QuerySnapshot> getEventsStream() {
+    Stream<QuerySnapshot<PuffEvent>> _puffStream = puffEventStream();
+    Stream<QuerySnapshot<CartridgeEvent>> _cartridgeStream = cartridgeEventStream();
+    Stream<QuerySnapshot<ChargeEvent>> _chargeStream = chargeEventStream();
+    Stream<QuerySnapshot<ResetEvent>> _resetStream = resetEventStream();
+
+    //return Rx.combineLatest4(_puffStream, _cartridgeStream, _chargeStream, _resetStream, (a, b, c, d) {
+    //  List<dynamic> events = [];
+    //  return events;
+    //});
+
+    //return Rx.merge([_puffStream, _cartridgeStream, _chargeStream, _resetStream]);
+    return Rx.merge([_puffStream, _cartridgeStream, _chargeStream, _resetStream]);
+  }
+
+  void startEventStreamListener() {
+    Stream<QuerySnapshot<PuffEvent>> _puffStream = puffEventStream();
+    Stream<QuerySnapshot<CartridgeEvent>> _cartridgeStream = cartridgeEventStream();
+    Stream<QuerySnapshot<ChargeEvent>> _chargeStream = chargeEventStream();
+    Stream<QuerySnapshot<ResetEvent>> _resetStream = resetEventStream();
+
+    Rx.merge([_puffStream, _cartridgeStream, _chargeStream, _resetStream]).listen((event) {
+
+    });
   }
 }

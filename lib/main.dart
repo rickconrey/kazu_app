@@ -20,6 +20,7 @@ import 'package:permission_handler/permission_handler.dart';
 
 import 'app_navigator.dart';
 import 'blocs/ble_bloc.dart';
+import 'blocs/feed_bloc.dart';
 import 'loading_view.dart';
 
 void main() {
@@ -82,6 +83,11 @@ class _AppState extends State<KazuApp> {
                         dataRepository: context.read<DataRepository>(),
                       ),
                   ),
+                BlocProvider(
+                  create: (context) => FeedBloc(
+                    dataRepository: context.read<DataRepository>(),
+                  ),
+                ),
                 ],
                 child: AppNavigator(),
               ),
