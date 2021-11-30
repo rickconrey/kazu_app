@@ -198,57 +198,101 @@ class DataRepository {
     }
   }
 
-  Stream<QuerySnapshot<PuffEvent>> puffEventStream() {
+  Stream<QuerySnapshot<PuffEvent>> puffEventStream(String userId, bool onlyUserId) {
+    if (onlyUserId == true) {
+      return Amplify.DataStore.observeQuery(
+        PuffEvent.classType,
+        where: PuffEvent.USERID.eq(userId),
+        sortBy: [PuffEvent.TIME.descending()],
+      );
+    }
     return Amplify.DataStore.observeQuery(
       PuffEvent.classType,
+      where: PuffEvent.USERID.ne(userId),
       sortBy: [PuffEvent.TIME.descending()],
     );
   }
 
-  Stream<QuerySnapshot<ResetEvent>> resetEventStream() {
+  Stream<QuerySnapshot<ResetEvent>> resetEventStream(String userId, bool onlyUserId) {
+    if (onlyUserId == true) {
+      return Amplify.DataStore.observeQuery(
+        ResetEvent.classType,
+        where: ResetEvent.USERID.eq(userId),
+        sortBy: [ResetEvent.TIME.descending()],
+      );
+    }
     return Amplify.DataStore.observeQuery(
       ResetEvent.classType,
+      where: ResetEvent.USERID.ne(userId),
       sortBy: [ResetEvent.TIME.descending()],
     );
   }
 
-  Stream<QuerySnapshot<CartridgeEvent>> cartridgeEventStream() {
+  Stream<QuerySnapshot<CartridgeEvent>> cartridgeEventStream(String userId, bool onlyUserId) {
+    if (onlyUserId == true) {
+      return Amplify.DataStore.observeQuery(
+        CartridgeEvent.classType,
+        where: CartridgeEvent.USERID.eq(userId),
+        sortBy: [CartridgeEvent.TIME.descending()],
+      );
+    }
     return Amplify.DataStore.observeQuery(
       CartridgeEvent.classType,
+      where: CartridgeEvent.USERID.ne(userId),
       sortBy: [CartridgeEvent.TIME.descending()],
     );
   }
 
-  Stream<QuerySnapshot<ChargeEvent>> chargeEventStream() {
+  Stream<QuerySnapshot<ChargeEvent>> chargeEventStream(String userId, bool onlyUserId) {
+    if (onlyUserId == true) {
+      return Amplify.DataStore.observeQuery(
+        ChargeEvent.classType,
+        where: ChargeEvent.USERID.eq(userId),
+        sortBy: [ChargeEvent.TIME.descending()],
+      );
+    }
     return Amplify.DataStore.observeQuery(
       ChargeEvent.classType,
+      where: ChargeEvent.USERID.ne(userId),
       sortBy: [ChargeEvent.TIME.descending()],
     );
   }
 
-  Stream<QuerySnapshot> getEventsStream() {
-    Stream<QuerySnapshot<PuffEvent>> _puffStream = puffEventStream();
-    Stream<QuerySnapshot<CartridgeEvent>> _cartridgeStream = cartridgeEventStream();
-    Stream<QuerySnapshot<ChargeEvent>> _chargeStream = chargeEventStream();
-    Stream<QuerySnapshot<ResetEvent>> _resetStream = resetEventStream();
+  //Stream<QuerySnapshot> getEventsStream() {
+  //  Stream<QuerySnapshot<PuffEvent>> _puffStream = puffEventStream();
+  //  Stream<QuerySnapshot<CartridgeEvent>> _cartridgeStream = cartridgeEventStream();
+  //  Stream<QuerySnapshot<ChargeEvent>> _chargeStream = chargeEventStream();
+  //  Stream<QuerySnapshot<ResetEvent>> _resetStream = resetEventStream();
 
-    //return Rx.combineLatest4(_puffStream, _cartridgeStream, _chargeStream, _resetStream, (a, b, c, d) {
-    //  List<dynamic> events = [];
-    //  return events;
-    //});
+  //  return Rx.merge([_puffStream, _cartridgeStream, _chargeStream, _resetStream]);
+  //}
 
-    //return Rx.merge([_puffStream, _cartridgeStream, _chargeStream, _resetStream]);
+  Stream<QuerySnapshot> getUserEventsStream(String userId) {
+    Stream<QuerySnapshot<PuffEvent>> _puffStream = puffEventStream(userId, true);
+    Stream<QuerySnapshot<CartridgeEvent>> _cartridgeStream = cartridgeEventStream(userId, true);
+    Stream<QuerySnapshot<ChargeEvent>> _chargeStream = chargeEventStream(userId, true);
+    Stream<QuerySnapshot<ResetEvent>> _resetStream = resetEventStream(userId, true);
+
     return Rx.merge([_puffStream, _cartridgeStream, _chargeStream, _resetStream]);
   }
 
-  void startEventStreamListener() {
-    Stream<QuerySnapshot<PuffEvent>> _puffStream = puffEventStream();
-    Stream<QuerySnapshot<CartridgeEvent>> _cartridgeStream = cartridgeEventStream();
-    Stream<QuerySnapshot<ChargeEvent>> _chargeStream = chargeEventStream();
-    Stream<QuerySnapshot<ResetEvent>> _resetStream = resetEventStream();
+  Stream<QuerySnapshot> getFeedEventsStream(String userId) {
+    Stream<QuerySnapshot<PuffEvent>> _puffStream = puffEventStream(userId, false);
+    Stream<QuerySnapshot<CartridgeEvent>> _cartridgeStream = cartridgeEventStream(userId, false);
+    Stream<QuerySnapshot<ChargeEvent>> _chargeStream = chargeEventStream(userId, false);
+    Stream<QuerySnapshot<ResetEvent>> _resetStream = resetEventStream(userId, false);
 
-    Rx.merge([_puffStream, _cartridgeStream, _chargeStream, _resetStream]).listen((event) {
-
-    });
+    return Rx.merge([_puffStream, _cartridgeStream, _chargeStream, _resetStream]);
   }
+
+  //void startEventStreamListener() {
+  //  Stream<QuerySnapshot<PuffEvent>> _puffStream = puffEventStream();
+  //  Stream<QuerySnapshot<CartridgeEvent>> _cartridgeStream = cartridgeEventStream();
+  //  Stream<QuerySnapshot<ChargeEvent>> _chargeStream = chargeEventStream();
+  //  Stream<QuerySnapshot<ResetEvent>> _resetStream = resetEventStream();
+
+  //  Rx.merge([_puffStream, _cartridgeStream, _chargeStream, _resetStream]).listen((event) {
+
+  //  });
+  //}
 }

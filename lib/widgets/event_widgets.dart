@@ -9,48 +9,48 @@ import 'package:kazu_app/repositories/data_repository.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 
 
-Widget buildEventStream(BuildContext context) {
-  //Stream<QuerySnapshot<PuffEvent>> _stream = context.read<DataRepository>().puffEventStream();
-  Stream<QuerySnapshot> _stream = context.read<DataRepository>().getEventsStream();
-  //_stream.listen(print);
-  return StreamBuilder<QuerySnapshot>(
-    stream: _stream,
-    builder: (c, snapshot) {
-      if (!snapshot.hasData) {
-        return const Center(child: CircularProgressIndicator());
-      }
-      print("${snapshot.data!.items.length}");
-      return SizedBox(
-        height: 400,
-        child: ListView(
-          children: snapshot.data!.items.map((item) {
-            if (item is PuffEvent) {
-              return Center(
-                child: buildPuffEventCard(item),
-              );
-            } else if (item is CartridgeEvent) {
-              return Center(
-                child: buildCartridgeEventCard(item),
-              );
-            } else if (item is ChargeEvent) {
-              return Center(
-                child: buildChargeEventCard(item),
-              );
-            } else if (item is ResetEvent) {
-              return Center(
-                child: buildResetEventCard(item),
-              );
-            }
-
-            return const Center(
-              child: Text("Invalid Event"),
-            );
-          }).toList(),
-        ),
-      );
-    },
-  );
-}
+//Widget buildEventStream(BuildContext context) {
+//  //Stream<QuerySnapshot<PuffEvent>> _stream = context.read<DataRepository>().puffEventStream();
+//  Stream<QuerySnapshot> _stream = context.read<DataRepository>().getEventsStream();
+//  //_stream.listen(print);
+//  return StreamBuilder<QuerySnapshot>(
+//    stream: _stream,
+//    builder: (c, snapshot) {
+//      if (!snapshot.hasData) {
+//        return const Center(child: CircularProgressIndicator());
+//      }
+//      print("${snapshot.data!.items.length}");
+//      return SizedBox(
+//        height: 400,
+//        child: ListView(
+//          children: snapshot.data!.items.map((item) {
+//            if (item is PuffEvent) {
+//              return Center(
+//                child: buildPuffEventCard(item),
+//              );
+//            } else if (item is CartridgeEvent) {
+//              return Center(
+//                child: buildCartridgeEventCard(item),
+//              );
+//            } else if (item is ChargeEvent) {
+//              return Center(
+//                child: buildChargeEventCard(item),
+//              );
+//            } else if (item is ResetEvent) {
+//              return Center(
+//                child: buildResetEventCard(item),
+//              );
+//            }
+//
+//            return const Center(
+//              child: Text("Invalid Event"),
+//            );
+//          }).toList(),
+//        ),
+//      );
+//    },
+//  );
+//}
 
 Widget buildEventCard(dynamic event) {
   if (event is PuffEvent) {

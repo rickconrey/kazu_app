@@ -11,8 +11,9 @@ import '../models/User.dart';
 
 class FeedBloc extends Bloc<FeedEvent, FeedState> {
   final DataRepository dataRepository;
+  final User user;
 
-  FeedBloc({required this.dataRepository}) : super(FeedState()) {
+  FeedBloc({required this.dataRepository, required this.user}) : super(FeedState()) {
     if (state.feedEvents == null && state.userEvents == null) {
       add(FeedEmpty());
     }
@@ -21,10 +22,14 @@ class FeedBloc extends Bloc<FeedEvent, FeedState> {
   @override
   Stream<FeedState> mapEventToState(FeedEvent event) async*{
     if (event is FeedEmpty) {
-      Stream<QuerySnapshot> _stream = dataRepository.getEventsStream();
+      Stream<QuerySnapshot> _userStream = dataRepository.getUserEventsStream(user.id);
+      Stream<QuerySnapshot> _feedStream = dataRepository.getFeedEventsStream(user.id);
 
-      _stream.listen((e) {
+      _userStream.listen((e) {
         add(FeedUpdateUser(event: e));
+      });
+
+      _feedStream.listen((e) {
         add(FeedUpdateFeed(event: e));
       });
 

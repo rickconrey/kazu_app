@@ -83,11 +83,6 @@ class _AppState extends State<KazuApp> {
                         dataRepository: context.read<DataRepository>(),
                       ),
                   ),
-                BlocProvider(
-                  create: (context) => FeedBloc(
-                    dataRepository: context.read<DataRepository>(),
-                  ),
-                ),
                 ],
                 child: AppNavigator(),
               ),
