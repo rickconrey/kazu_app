@@ -20,18 +20,19 @@ import 'package:permission_handler/permission_handler.dart';
 
 import 'app_navigator.dart';
 import 'blocs/ble_bloc.dart';
-import 'blocs/feed_bloc.dart';
 import 'loading_view.dart';
 
 void main() {
   Bloc.observer = SimpleBlocObserver();
 
   //BlocOverrides.runZoned(() => runApp(KazuApp()), blocObserver: observer);
-  runApp(KazuApp());
+  runApp(const KazuApp());
   //runApp(const MyApp());
 }
 
 class KazuApp extends StatefulWidget {
+  const KazuApp({Key? key}) : super(key: key);
+
   @override
   State<StatefulWidget> createState() => _AppState();
 }
