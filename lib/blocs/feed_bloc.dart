@@ -1,10 +1,8 @@
-import 'package:amplify_datastore/amplify_datastore.dart';
 import 'package:kazu_app/repositories/data_repository.dart';
 import 'package:kazu_app/states/feed_state.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:kazu_app/events/feed_event.dart';
 import 'package:amplify_datastore_plugin_interface/amplify_datastore_plugin_interface.dart';
-import 'package:kazu_app/models/PuffEvent.dart';
 
 import '../image_cache.dart';
 import '../models/User.dart';
@@ -36,7 +34,9 @@ class FeedBloc extends Bloc<FeedEvent, FeedState> {
     } else if (event is FeedUpdateUser) {
       List<Model> userEvents = state.userEvents ?? [];
       for (Model e in event.event!.items) {
-        userEvents.add(e);
+        if (userEvents.contains(e) == false) {
+          userEvents.add(e);
+        }
       }
       userEvents.sort((a, b) {
         dynamic event1 = a;
@@ -50,7 +50,9 @@ class FeedBloc extends Bloc<FeedEvent, FeedState> {
       Map<String, String> userAvatarPaths = state.userAvatarPaths ?? {};
 
       for (dynamic e in event.event!.items) {
-        feedEvents.add(e);
+        if(feedEvents.contains(e) == false) {
+          feedEvents.add(e);
+        }
         if (users.containsKey(e.userId) == false) {
           User? user = await dataRepository.getUserById(e.userId!);
           if (user != null) {
