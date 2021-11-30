@@ -1,15 +1,8 @@
-import 'package:amplify_datastore/amplify_datastore.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:kazu_app/blocs/feed_bloc.dart';
 import 'package:kazu_app/cubit/feed_navigator_cubit.dart';
-import 'package:kazu_app/models/User.dart';
-import 'package:kazu_app/repositories/data_repository.dart';
-import 'package:kazu_app/models/PuffEvent.dart';
-import 'package:kazu_app/models/ChargeEvent.dart';
-import 'package:kazu_app/models/CartridgeEvent.dart';
-import 'package:kazu_app/models/ResetEvent.dart';
 import 'package:kazu_app/states/feed_state.dart';
 import 'package:kazu_app/widgets/event_widgets.dart';
 
@@ -125,8 +118,8 @@ class FeedView extends StatelessWidget {
   Widget _postsListView() {
     return BlocBuilder<FeedBloc, FeedState>(builder: (context, state) {
       return ListView(
-        children: state.userEvents != null
-          ? state.userEvents!.map((item) {
+        children: state.feedEvents != null
+          ? state.feedEvents!.map((item) {
             return _postView(item);
           //if(item is PuffEvent){
           //  return buildPuffEventCard(item);
