@@ -32,7 +32,9 @@ class BleBloc extends Bloc<BleEvent, BleState> {
 
     } else if (event is BleScanResult) {
       List<ScanResult> results = state.scanResults ?? [];
-      results.add(event.result!);
+      if (results.contains(event.result) == false) {
+        results.add(event.result!);
+      }
       yield state.copyWith(scanResults: results);
 
     } else if (event is BleConnectRequest) {
@@ -47,7 +49,7 @@ class BleBloc extends Bloc<BleEvent, BleState> {
               print("Found kazu Rx");
               yield state.copyWith(rx: characteristic);
             } else if (characteristic.uuid == kazuTxNotifyUuid) {
-              print("Found kazu RxNotify");
+              print("Found kazu TxNotify");
               yield state.copyWith(txNotify: characteristic);
             } else if (characteristic.uuid == kazuTxUuid) {
               print("Found kazu Tx");
