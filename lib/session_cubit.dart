@@ -41,6 +41,15 @@ class SessionCubit extends Cubit<SessionState> {
   }
   void showAuth() => emit(Unauthenticated());
 
+  void selectUser(String? userId) async {
+    if (userId == null) {
+      emit(Authenticated(user: currentUser));
+      return;
+    }
+    User? _selectedUser = await dataRepository.getUserById(userId);
+    emit(Authenticated(user: currentUser, selectedUser: _selectedUser));
+  }
+
   void showSession(AuthCredentials credentials) async {
     try {
       User user = await dataRepository.getUserById(credentials.userId!) ??

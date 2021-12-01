@@ -12,5 +12,5 @@ class Authenticated extends SessionState {
   final User user;
   User? selectedUser;
 
-  Authenticated({required this.user});
+  Authenticated({required this.user, this.selectedUser});
 }

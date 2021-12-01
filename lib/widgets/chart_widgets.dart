@@ -38,7 +38,37 @@ Widget _buildChart({required List<charts.Series<TimeSeriesAmount, String>> serie
 }
 
 Widget buildTodayChart() {
-  return Text("Today"); //_buildChart();
+  List<charts.TickSpec<String>> chartTicks = [];
+  chartTicks.add(const charts.TickSpec('0', label: 'AM'));
+  for (int i = 1; i < 12; i++) {
+    chartTicks.add(charts.TickSpec(i.toString(), label: ''));
+  }
+  chartTicks.add(const charts.TickSpec('12', label: 'NOON'));
+  for (int i = 13; i < 23; i++) {
+    chartTicks.add(charts.TickSpec(i.toString(), label: ''));
+  }
+  chartTicks.add(const charts.TickSpec('23', label: 'PM'));
+
+  List<TimeSeriesAmount> data = [];
+  for (int i = 0; i < 24; i++) {
+    data.add(TimeSeriesAmount(time: i.toString(), amount: i));
+  }
+
+  var chartData = [
+    charts.Series<TimeSeriesAmount, String>(
+      id: 'Amount',
+      colorFn: ((TimeSeriesAmount amount, _) {
+        return charts.MaterialPalette.gray.shadeDefault;
+      }),
+      domainFn: (TimeSeriesAmount amount, _) => amount.time,
+      measureFn: (TimeSeriesAmount amount, _) => amount.amount,
+      labelAccessorFn: ((TimeSeriesAmount amount, _) {
+        return "";
+      }),
+      data: data,
+    ),
+  ];
+  return _buildChart(series: chartData, ticks: chartTicks);
 }
 
 Widget buildWeekChart() {
@@ -111,5 +141,42 @@ Widget buildWeekChart() {
 }
 
 Widget buildMonthChart() {
-  return Text("Wait"); //_buildChart();
+  DateTime dt = DateTime.now();
+  List<DateTime> dateList = [];
+
+  for (int i = 0; i < 30; i++) {
+    dateList.add(dt.subtract(Duration(days: 29 - i)));
+  }
+
+  List<charts.TickSpec<String>> chartTicks = [];
+  chartTicks.add(charts.TickSpec('0', label: DateFormat("MMMd").format(dateList[0])));
+  for (int i = 1; i < 15; i++) {
+    chartTicks.add(charts.TickSpec(i.toString(), label: ''));
+  }
+  chartTicks.add(charts.TickSpec('15', label: DateFormat("MMMd").format(dateList[15])));
+  for (int i = 16; i < 29; i++) {
+    chartTicks.add(charts.TickSpec(i.toString(), label: ''));
+  }
+  chartTicks.add(const charts.TickSpec('29', label: 'TODAY'));
+
+  List<TimeSeriesAmount> data = [];
+  for (int i = 0; i < 30; i++) {
+    data.add(TimeSeriesAmount(time: i.toString(), amount: i));
+  }
+
+  var chartData = [
+    charts.Series<TimeSeriesAmount, String>(
+      id: 'Amount',
+      colorFn: ((TimeSeriesAmount amount, _) {
+        return charts.MaterialPalette.gray.shadeDefault;
+      }),
+      domainFn: (TimeSeriesAmount amount, _) => amount.time,
+      measureFn: (TimeSeriesAmount amount, _) => amount.amount,
+      labelAccessorFn: ((TimeSeriesAmount amount, _) {
+        return "";
+      }),
+      data: data,
+    ),
+  ];
+  return _buildChart(series: chartData, ticks: chartTicks);
 }

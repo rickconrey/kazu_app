@@ -6,7 +6,7 @@ import 'package:kazu_app/session_cubit.dart';
 class SessionView extends StatelessWidget {
   final String? username;
 
-  SessionView({Key? key, this.username}) : super(key: key);
+  const SessionView({Key? key, this.username}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {

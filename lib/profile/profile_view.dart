@@ -16,6 +16,8 @@ import 'package:kazu_app/states/form_submission_status.dart';
 class ProfileView extends StatelessWidget {
   final appBarHeight = AppBar().preferredSize.height;
 
+  ProfileView({Key? key, String? userId}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     final sessionCubit = context.read<SessionCubit>();

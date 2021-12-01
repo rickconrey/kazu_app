@@ -7,6 +7,7 @@ import 'package:kazu_app/states/feed_state.dart';
 import 'package:kazu_app/widgets/event_widgets.dart';
 
 import '../image_cache.dart';
+import '../session_cubit.dart';
 
 class FeedView extends StatelessWidget {
   final _dummyAvatar =
@@ -33,7 +34,10 @@ class FeedView extends StatelessWidget {
       String _avatarPath = state.userAvatarPaths?[userId] ?? _dummyAvatar;
 
       return GestureDetector(
-        onTap: () => BlocProvider.of<FeedNavigatorCubit>(context).showProfile(),
+        onTap: () {
+          context.read<SessionCubit>().selectUser(userId);
+          BlocProvider.of<FeedNavigatorCubit>(context).showProfile();
+          },
         child: Row(
           children: [
             Padding(
