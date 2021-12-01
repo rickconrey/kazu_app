@@ -168,6 +168,7 @@ class DataRepository {
       String deviceId = "0"; // todo: get device id
       int duration = telemetry.puffEvent.duration;
       int doseNumber = telemetry.puffEvent.doseNumber;
+      int amount = telemetry.puffEvent.amount;
 
       final event = PuffEvent(
         userId: userId,
@@ -178,6 +179,7 @@ class DataRepository {
         json: json,
         duration: duration,
         doseNumber: doseNumber,
+        amount: amount,
       );
       await Amplify.DataStore.save(event);
       return event;

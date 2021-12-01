@@ -3,9 +3,6 @@ import 'package:kazu_app/models/PuffEvent.dart';
 import 'package:kazu_app/models/ChargeEvent.dart';
 import 'package:kazu_app/models/CartridgeEvent.dart';
 import 'package:kazu_app/models/ResetEvent.dart';
-import 'package:amplify_datastore/amplify_datastore.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:kazu_app/repositories/data_repository.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 
 
@@ -99,7 +96,7 @@ Widget buildPuffEventCard(PuffEvent event) {
         children: [
           Text("Dose Number: ${event.doseNumber}"),
           Text("Duration: ${event.duration}"),
-          const Text("Amount: "),
+          Text("Amount: ${event.amount}"),
         ],
       ),
     ),
