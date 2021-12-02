@@ -1,12 +1,16 @@
+import 'dart:io';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_blue/flutter_blue.dart';
 import 'package:kazu_app/events/ble_event.dart';
 import 'package:kazu_app/generated/telemetry.pb.dart';
+import 'package:kazu_app/generated/control.pb.dart';
 import 'package:kazu_app/models/User.dart';
 import 'package:kazu_app/repositories/ble_repository.dart';
 import 'package:kazu_app/repositories/data_repository.dart';
 import 'package:kazu_app/states/ble_state.dart';
 import 'package:kazu_app/utils/cobs.dart';
+
+import '../utils/packet.dart';
 
 class BleBloc extends Bloc<BleEvent, BleState> {
   final BleRepository bleRepository;
@@ -68,9 +72,32 @@ class BleBloc extends Bloc<BleEvent, BleState> {
       //state.device?.requestMtu(42);
       //var mtu = await state.device?.mtu.first;
       //print("MTU: $mtu");
-      //state.device?.requestMtu(512);
-      //mtu = await state.device?.mtu.first;
-      //print("MTU: $mtu");
+      //if (Platform.isAndroid) {
+      //  await state.device?.requestMtu(223);
+      //  var mtu = await state.device?.mtu.first;
+      //  print("MTU: $mtu");
+      //}
+
+      Packet packet = Packet();
+      Map<String, bool> flags = {"requestAck": true, "encrypted": false, "compressed": false};
+      ControlEnvelope controlEnvelope = ControlEnvelope.create();
+      controlEnvelope.command = Command.SET_RTC;
+      RtcInformation rtcInformation = RtcInformation.create();
+      rtcInformation.time = DateTime.now().millisecondsSinceEpoch ~/ 1000;
+      print("Time: $rtcInformation.time");
+      SetRtc setRtc = SetRtc.create();
+      setRtc.rtcInformation = rtcInformation;
+      controlEnvelope.setRtc = setRtc;
+      //controlEnvelope.setRtc.rtcInformation.time = DateTime.now().millisecondsSinceEpoch ~/ 1000;
+      List<int> payload = controlEnvelope.writeToBuffer();
+      print("Payload: $payload");
+      List<List<int>>? txPackets = packet.buildTxPacket(streamId: PacketStreamIdEnum.control, flags: flags, payload: payload);
+      if (txPackets != null) {
+        for (List<int> message in txPackets) {
+          print("Adding message to BleTx: $message");
+          add(BleTx(message: message));
+        }
+      }
 
       await state.txNotify?.setNotifyValue(true);
       state.txNotify?.value.listen((value) async {
@@ -85,12 +112,6 @@ class BleBloc extends Bloc<BleEvent, BleState> {
                 userId: state.user?.id ?? "0",
                 telemetry: telemetry,
               );
-              //if (telemetry.whichPayload() == Telemetry_Payload.puffEvent) {
-              //  dataRepository.createPuffEvent(
-              //      userId: state.user?.id ?? "0",
-              //      telemetry: telemetry,
-              //  );
-              //}
             }
           }
         }
@@ -98,7 +119,7 @@ class BleBloc extends Bloc<BleEvent, BleState> {
     } else if (event is BleTx) {
       try {
         if (event.message != null) {
-          state.rx?.write(event.message!);
+          await state.rx?.write(event.message!);
         }
       } catch (e) {
         rethrow;
@@ -106,7 +127,7 @@ class BleBloc extends Bloc<BleEvent, BleState> {
     } else if (event is BleDisconnected) {
       state.txNotify?.setNotifyValue(false);
       if (state.device != null) {
-        bleRepository.disconnectFromDevice(state.device!);
+        await bleRepository.disconnectFromDevice(state.device!);
         yield state.copyWith(isConnected: false);
       }
     }

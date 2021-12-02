@@ -200,6 +200,18 @@ class DataRepository {
     }
   }
 
+  Future<List<PuffEvent>?> getPuffEventsByDateRange(String userId, DateTime startTime, DateTime endTime) async {
+    try {
+      final puffEvents = await Amplify.DataStore.query(
+        PuffEvent.classType,
+        where: PuffEvent.USERID.eq(userId).and(PuffEvent.TIME.gt(startTime)).and(PuffEvent.TIME.lt(endTime)),
+      );
+      return puffEvents.isNotEmpty ? puffEvents : null;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
   Stream<QuerySnapshot<PuffEvent>> puffEventStream(String userId, bool onlyUserId) {
     if (onlyUserId == true) {
       return Amplify.DataStore.observeQuery(

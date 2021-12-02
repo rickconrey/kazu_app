@@ -129,7 +129,7 @@ Widget buildCartridgeEventCard(CartridgeEvent event) {
         children: [
           Text("Dose Number: ${event.doseNumber}"),
           //Text("Duration: ${event.duration}"),
-          const Text("Amount: "),
+          //const Text("Amount: "),
         ],
       ),
     ),

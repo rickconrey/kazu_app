@@ -20,8 +20,10 @@ class TodayView extends StatelessWidget{
           appBar: AppBar(
             title: const Text("Kazu"),
             leading: IconButton(
-              onPressed: () =>
-                  BlocProvider.of<HomeNavigatorCubit>(context).showProfile(),
+              onPressed: () {
+                context.read<SessionCubit>().selectUser(null);
+                BlocProvider.of<HomeNavigatorCubit>(context).showProfile();
+              },
               icon: const Icon(Icons.person),
             ),
           ),
@@ -32,15 +34,15 @@ class TodayView extends StatelessWidget{
                 index: state,
                 children: [
                   SizedBox(
-                    height: 500,
+                    height: MediaQuery.of(context).size.height * 0.4,
                     child: buildTodayChart(),
                   ),
                   SizedBox(
-                    height: 500,
+                    height: MediaQuery.of(context).size.height * 0.4,
                     child: buildWeekChart(),
                   ),
                   SizedBox(
-                    height: 500,
+                    height: MediaQuery.of(context).size.height * 0.4,
                     child: buildMonthChart(),
                   ),
                   //Placeholder(
@@ -76,16 +78,16 @@ class TodayView extends StatelessWidget{
   Widget _buildUserFeed() {
     return BlocBuilder<FeedBloc, FeedState>(builder: (context, state) {
       return SafeArea(
-          child: SizedBox(
-        height: 340,
-        child: ListView(
-          children: state.userEvents != null
+        child: SizedBox(
+          height: MediaQuery.of(context).size.height * 0.3,
+          child: ListView(
+            children: state.userEvents != null
               ? state.userEvents!.map((item) {
-            return buildEventCard(item);
-          }).toList()
+                  return buildEventCard(item);
+                }).toList()
               : []
-        )
-      ),
+          ),
+        ),
       );
     });
   }

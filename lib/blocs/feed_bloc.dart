@@ -33,10 +33,23 @@ class FeedBloc extends Bloc<FeedEvent, FeedState> {
 
     } else if (event is FeedUpdateUser) {
       List<Model> userEvents = state.userEvents ?? [];
-      for (Model e in event.event!.items) {
-        if (userEvents.contains(e) == false) {
+      for (dynamic e in event.event!.items) {
+        bool test = false;
+        for (dynamic item in userEvents) {
+          if (e.id == item.id) {
+            test = true;
+            break;
+          }
+        }
+        if (test == false) {
           userEvents.add(e);
         }
+        //if ((userEvents.singleWhere((item) => item.id == e.id,
+        //orElse: () => null,
+        //)))//if (userEvents.contains(e) == false) {
+        //    userEvents.add(e);
+        //  }
+        //}
       }
       userEvents.sort((a, b) {
         dynamic event1 = a;
