@@ -1,4 +1,4 @@
-import '../generated/events/puffEvent.pb.dart';
+import 'package:kazu_app/models/PuffEvent.dart';
 
 abstract class ChartEvent {}
 

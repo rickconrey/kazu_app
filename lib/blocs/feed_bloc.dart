@@ -1,15 +1,19 @@
+import 'package:kazu_app/events/chart_event.dart';
 import 'package:kazu_app/repositories/data_repository.dart';
 import 'package:kazu_app/states/feed_state.dart';
+import 'package:kazu_app/models/PuffEvent.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:kazu_app/events/feed_event.dart';
 import 'package:amplify_datastore_plugin_interface/amplify_datastore_plugin_interface.dart';
 
 import '../image_cache.dart';
 import '../models/User.dart';
+import 'chart_bloc.dart';
 
 class FeedBloc extends Bloc<FeedEvent, FeedState> {
   final DataRepository dataRepository;
   final User user;
+  ChartBloc? chartBloc;
 
   FeedBloc({required this.dataRepository, required this.user}) : super(FeedState()) {
     if (state.feedEvents == null && state.userEvents == null) {
@@ -43,6 +47,9 @@ class FeedBloc extends Bloc<FeedEvent, FeedState> {
         }
         if (test == false) {
           userEvents.add(e);
+          if (e is PuffEvent) {
+            chartBloc?.add(ChartUpdateData(event: e));
+          }
         }
         //if ((userEvents.singleWhere((item) => item.id == e.id,
         //orElse: () => null,

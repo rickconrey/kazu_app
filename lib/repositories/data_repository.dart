@@ -200,7 +200,7 @@ class DataRepository {
     }
   }
 
-  Future<List<PuffEvent>?> getPuffEventsByDateRange(String userId, DateTime startTime, DateTime endTime) async {
+  Future<List<PuffEvent>?> getPuffEventsByDateRange(String userId, int startTime, int endTime) async {
     try {
       final puffEvents = await Amplify.DataStore.query(
         PuffEvent.classType,
