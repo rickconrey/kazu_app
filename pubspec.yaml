@@ -31,6 +31,7 @@ dependencies:
     sdk: flutter
 
   flutter_blue:
+    path: ./flutter_blue
   rxdart:
 
   charts_flutter:

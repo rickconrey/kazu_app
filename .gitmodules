@@ -1,3 +1,6 @@
 [submodule "witi-nanopb"]
 	path = protobuf
 	url = git@github.com:rickconrey/witi-nanopb.git
+[submodule "flutter_blue"]
+	path = flutter_blue
+	url = git@github.com:boskokg/flutter_blue.git
