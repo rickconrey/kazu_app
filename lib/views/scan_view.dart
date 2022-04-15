@@ -26,7 +26,7 @@ class ScanView extends StatelessWidget {
                   return ScanResultTile(
                     result: item,
                     onTap: () =>
-                    state.isConnected == false
+                      state.isConnected == false
                         ? context.read<BleBloc>().add(
                           BleConnectRequest(
                             device: item,
@@ -135,12 +135,11 @@ class ScanResultTile extends StatelessWidget {
     return ExpansionTile(
       title: _buildTitle(context),
       leading: Text(result.rssi.toString()),
-      trailing: RaisedButton(
-        child: context.read<BleBloc>().state.isConnected!
+      trailing: ElevatedButton(
+        child: result.device.state == BluetoothDeviceState.connected
+          //child: context.read<BleBloc>().state.isConnected!
         ? Text('DISCONNECT')
         : Text('CONNECT'),
-        color: Colors.black,
-        textColor: Colors.white,
         onPressed: (result.advertisementData.connectable) ? onTap : null,
       ),
       children: <Widget>[

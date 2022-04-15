@@ -44,6 +44,7 @@ class BleBloc extends Bloc<BleEvent, BleState> {
     } else if (event is BleConnectRequest) {
       yield state.copyWith(device: event.device.device, user: event.user);
       await state.device?.connect();
+      await state.device?.requestMtu(128);
       List<BluetoothService>? services = await state.device?.discoverServices();
       for (BluetoothService service in services!) {
         if (service.uuid == kazuServiceUuid) {
@@ -68,6 +69,7 @@ class BleBloc extends Bloc<BleEvent, BleState> {
 
     } else if (event is BleConnected) {
       yield state.copyWith(isConnected: true);
+      //yield state.copyWith(result: {"")
 
       //state.device?.requestMtu(42);
       //var mtu = await state.device?.mtu.first;

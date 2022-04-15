@@ -1,13 +1,14 @@
 import 'package:amplify_auth_cognito/amplify_auth_cognito.dart';
-import 'package:amplify_flutter/amplify.dart';
-import 'package:flutter/cupertino.dart';
+//import 'package:amplify_flutter/amplify.dart';
+import 'package:amplify_flutter/amplify_flutter.dart';
+//import 'package:flutter/cupertino.dart';
 
 class AuthRepository {
   Future<String> _getUserIdFromAttributes() async {
     try {
       final attributes = await Amplify.Auth.fetchUserAttributes();
       final userId = attributes
-          .firstWhere((element) => element.userAttributeKey == 'sub')
+          .firstWhere((element) => element.userAttributeKey.toString() == 'sub')
           .value;
       return userId;
     } catch (e) {
@@ -41,7 +42,7 @@ class AuthRepository {
   }
 
   Future<bool> signUp({required String username, required String email, required String password}) async {
-    final options = CognitoSignUpOptions(userAttributes: {'email': email.trim()});
+    final options = CognitoSignUpOptions(userAttributes: {CognitoUserAttributeKey.email: email.trim()});
     try {
       final result = await Amplify.Auth.signUp(
         username: username.trim(),

@@ -19,7 +19,7 @@
 
 // ignore_for_file: public_member_api_docs, file_names, unnecessary_new, prefer_if_null_operators, prefer_const_constructors, slash_for_doc_comments, annotate_overrides, non_constant_identifier_names, unnecessary_string_interpolations, prefer_adjacent_string_concatenation, unnecessary_const, dead_code
 
-import 'package:amplify_datastore_plugin_interface/amplify_datastore_plugin_interface.dart';
+import 'package:amplify_core/amplify_core.dart';
 import 'package:flutter/foundation.dart';
 
 
@@ -33,6 +33,8 @@ class ResetEvent extends Model {
   final String? _json;
   final String? _userId;
   final String? _deviceId;
+  final TemporalDateTime? _createdAt;
+  final TemporalDateTime? _updatedAt;
 
   @override
   getInstanceType() => classType;
@@ -62,7 +64,15 @@ class ResetEvent extends Model {
     return _deviceId;
   }
   
-  const ResetEvent._internal({required this.id, time, reason, json, userId, deviceId}): _time = time, _reason = reason, _json = json, _userId = userId, _deviceId = deviceId;
+  TemporalDateTime? get createdAt {
+    return _createdAt;
+  }
+  
+  TemporalDateTime? get updatedAt {
+    return _updatedAt;
+  }
+  
+  const ResetEvent._internal({required this.id, time, reason, json, userId, deviceId, createdAt, updatedAt}): _time = time, _reason = reason, _json = json, _userId = userId, _deviceId = deviceId, _createdAt = createdAt, _updatedAt = updatedAt;
   
   factory ResetEvent({String? id, TemporalTimestamp? time, String? reason, String? json, String? userId, String? deviceId}) {
     return ResetEvent._internal(
@@ -103,14 +113,16 @@ class ResetEvent extends Model {
     buffer.write("reason=" + "$_reason" + ", ");
     buffer.write("json=" + "$_json" + ", ");
     buffer.write("userId=" + "$_userId" + ", ");
-    buffer.write("deviceId=" + "$_deviceId");
+    buffer.write("deviceId=" + "$_deviceId" + ", ");
+    buffer.write("createdAt=" + (_createdAt != null ? _createdAt!.format() : "null") + ", ");
+    buffer.write("updatedAt=" + (_updatedAt != null ? _updatedAt!.format() : "null"));
     buffer.write("}");
     
     return buffer.toString();
   }
   
   ResetEvent copyWith({String? id, TemporalTimestamp? time, String? reason, String? json, String? userId, String? deviceId}) {
-    return ResetEvent(
+    return ResetEvent._internal(
       id: id ?? this.id,
       time: time ?? this.time,
       reason: reason ?? this.reason,
@@ -125,10 +137,12 @@ class ResetEvent extends Model {
       _reason = json['reason'],
       _json = json['json'],
       _userId = json['userId'],
-      _deviceId = json['deviceId'];
+      _deviceId = json['deviceId'],
+      _createdAt = json['createdAt'] != null ? TemporalDateTime.fromString(json['createdAt']) : null,
+      _updatedAt = json['updatedAt'] != null ? TemporalDateTime.fromString(json['updatedAt']) : null;
   
   Map<String, dynamic> toJson() => {
-    'id': id, 'time': _time?.toSeconds(), 'reason': _reason, 'json': _json, 'userId': _userId, 'deviceId': _deviceId
+    'id': id, 'time': _time?.toSeconds(), 'reason': _reason, 'json': _json, 'userId': _userId, 'deviceId': _deviceId, 'createdAt': _createdAt?.format(), 'updatedAt': _updatedAt?.format()
   };
 
   static final QueryField ID = QueryField(fieldName: "resetEvent.id");
@@ -182,6 +196,20 @@ class ResetEvent extends Model {
       key: ResetEvent.DEVICEID,
       isRequired: false,
       ofType: ModelFieldType(ModelFieldTypeEnum.string)
+    ));
+    
+    modelSchemaDefinition.addField(ModelFieldDefinition.nonQueryField(
+      fieldName: 'createdAt',
+      isRequired: false,
+      isReadOnly: true,
+      ofType: ModelFieldType(ModelFieldTypeEnum.dateTime)
+    ));
+    
+    modelSchemaDefinition.addField(ModelFieldDefinition.nonQueryField(
+      fieldName: 'updatedAt',
+      isRequired: false,
+      isReadOnly: true,
+      ofType: ModelFieldType(ModelFieldTypeEnum.dateTime)
     ));
   });
 }

@@ -1,4 +1,5 @@
-import 'package:amplify_flutter/amplify.dart';
+//import 'package:amplify_flutter/amplify.dart';
+import 'package:amplify_flutter/amplify_flutter.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:kazu_app/repositories/auth_repository.dart';
 import 'package:kazu_app/repositories/data_repository.dart';

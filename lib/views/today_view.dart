@@ -18,6 +18,8 @@ class TodayView extends StatelessWidget{
 
   @override
   Widget build(BuildContext context) {
+    double screenHeight = MediaQuery.of(context).size.height;
+    double statusBarHeight = MediaQuery.of(context).padding.top;
     return MultiBlocProvider(
       providers: [
         BlocProvider(create: (context) => ChartNavigatorCubit()),
@@ -29,17 +31,30 @@ class TodayView extends StatelessWidget{
         ),
       ],
       child: BlocBuilder<ChartNavigatorCubit, int>(builder: (context, state) {
-        return Scaffold(
-          appBar: AppBar(
-            title: const Text("Kazu"),
-            leading: IconButton(
-              onPressed: () {
-                context.read<SessionCubit>().selectUser(null);
-                BlocProvider.of<HomeNavigatorCubit>(context).showProfile();
-              },
-              icon: const Icon(Icons.person),
-            ),
+        var appBar = AppBar(
+          title: const Text("Kazu"),
+          leading: IconButton(
+          onPressed: () {
+          context.read<SessionCubit>().selectUser(null);
+          BlocProvider.of<HomeNavigatorCubit>(context).showProfile();
+          },
+          icon: const Icon(Icons.person),
           ),
+        );
+        double appBarHeight = appBar.preferredSize.height;
+        double totalHeight = screenHeight - appBarHeight - statusBarHeight;
+        return Scaffold(
+          appBar: appBar,
+        //appBar: AppBar(
+        //    title: const Text("Kazu"),
+        //    leading: IconButton(
+        //      onPressed: () {
+        //        context.read<SessionCubit>().selectUser(null);
+        //        BlocProvider.of<HomeNavigatorCubit>(context).showProfile();
+        //      },
+        //      icon: const Icon(Icons.person),
+        //    ),
+        //  ),
           body: Column(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
@@ -49,28 +64,31 @@ class TodayView extends StatelessWidget{
                   index: state,
                   children: [
                     SizedBox(
-                      height: MediaQuery
-                          .of(context)
-                          .size
-                          .height * 0.4,
+                      height: totalHeight * 0.4,
+                      //height: MediaQuery
+                      //    .of(context)
+                      //    .size
+                      //    .height * 0.4,
                       child: s.todayData != null
                           ? buildTodayChart(s.todayData!, s.todayTicks!)
                           : const CircularProgressIndicator(),
                     ),
                     SizedBox(
-                      height: MediaQuery
-                          .of(context)
-                          .size
-                          .height * 0.4,
+                      height: totalHeight * 0.4,
+                      //height: MediaQuery
+                      //    .of(context)
+                      //    .size
+                      //    .height * 0.4,
                       child: s.weekData != null
                           ? buildWeekChart(s.weekData!, s.weekTicks!)
                           : const CircularProgressIndicator(),
                     ),
                     SizedBox(
-                      height: MediaQuery
-                          .of(context)
-                          .size
-                          .height * 0.4,
+                      height: totalHeight * 0.4,
+                      //height: MediaQuery
+                      //    .of(context)
+                      //    .size
+                      //    .height * 0.4,
                       child: s.todayData != null
                           ? buildMonthChart(s.monthData!, s.monthTicks!)
                           : const CircularProgressIndicator(),
@@ -90,7 +108,7 @@ class TodayView extends StatelessWidget{
                   BottomNavigationBarItem(icon: Icon(MdiIcons.calendarMonth), label: "Month",),
                 ]
               ),
-              _buildUserFeed(),
+              _buildUserFeed(totalHeight),
               _deviceButton(context),
             ],
           ),
@@ -106,11 +124,12 @@ class TodayView extends StatelessWidget{
     );
   }
 
-  Widget _buildUserFeed() {
+  Widget _buildUserFeed(double height) {
     return BlocBuilder<FeedBloc, FeedState>(builder: (context, state) {
       return SafeArea(
         child: SizedBox(
-          height: MediaQuery.of(context).size.height * 0.3,
+          height: height * 0.3,
+          //height: MediaQuery.of(context).size.height * 0.3,
           child: ListView(
             children: state.userEvents != null
               ? state.userEvents!.map((item) {

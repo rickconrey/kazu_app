@@ -6,7 +6,7 @@ import 'package:synchronized/synchronized.dart';
 
 class BleState {
   final User? user;
-  final ScanResult? result;
+  final Map<String, dynamic>? result;
   final BluetoothDevice? device;
   final List<BluetoothService>? services;
   final BluetoothCharacteristic? tx;
@@ -32,7 +32,8 @@ class BleState {
 
   BleState copyWith({
     User? user,
-    ScanResult? result,
+    //ScanResult? result,
+    Map<String, dynamic>? result,
     List<ScanResult>? scanResults,
     BluetoothDevice? device,
     List<BluetoothService>? services,

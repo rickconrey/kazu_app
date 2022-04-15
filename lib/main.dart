@@ -1,5 +1,6 @@
 import 'package:amplify_auth_cognito/amplify_auth_cognito.dart';
-import 'package:amplify_flutter/amplify.dart';
+//import 'package:amplify_flutter/amplify.dart';
+import 'package:amplify_flutter/amplify_flutter.dart';
 import 'package:amplify_api/amplify_api.dart';
 import 'package:amplify_datastore/amplify_datastore.dart';
 import 'package:amplify_storage_s3/amplify_storage_s3.dart';
@@ -108,7 +109,13 @@ class _AppState extends State<KazuApp> {
         //AmplifyAnalyticsPinpoint(),
       ]);
 
-      await Amplify.configure(amplifyconfig);
+      if (Amplify.isConfigured == false) {
+        try {
+          await Amplify.configure(amplifyconfig);
+        } catch (e) {
+          print(e);
+        }
+      }
 
       setState(() => _isAmplifyConfigured = true);
     } catch (e) {

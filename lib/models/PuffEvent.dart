@@ -19,7 +19,7 @@
 
 // ignore_for_file: public_member_api_docs, file_names, unnecessary_new, prefer_if_null_operators, prefer_const_constructors, slash_for_doc_comments, annotate_overrides, non_constant_identifier_names, unnecessary_string_interpolations, prefer_adjacent_string_concatenation, unnecessary_const, dead_code
 
-import 'package:amplify_datastore_plugin_interface/amplify_datastore_plugin_interface.dart';
+import 'package:amplify_core/amplify_core.dart';
 import 'package:flutter/foundation.dart';
 
 
@@ -36,6 +36,8 @@ class PuffEvent extends Model {
   final int? _duration;
   final int? _doseNumber;
   final int? _amount;
+  final TemporalDateTime? _createdAt;
+  final TemporalDateTime? _updatedAt;
 
   @override
   getInstanceType() => classType;
@@ -77,7 +79,15 @@ class PuffEvent extends Model {
     return _amount;
   }
   
-  const PuffEvent._internal({required this.id, userId, time, json, cartridgeId, deviceId, duration, doseNumber, amount}): _userId = userId, _time = time, _json = json, _cartridgeId = cartridgeId, _deviceId = deviceId, _duration = duration, _doseNumber = doseNumber, _amount = amount;
+  TemporalDateTime? get createdAt {
+    return _createdAt;
+  }
+  
+  TemporalDateTime? get updatedAt {
+    return _updatedAt;
+  }
+  
+  const PuffEvent._internal({required this.id, userId, time, json, cartridgeId, deviceId, duration, doseNumber, amount, createdAt, updatedAt}): _userId = userId, _time = time, _json = json, _cartridgeId = cartridgeId, _deviceId = deviceId, _duration = duration, _doseNumber = doseNumber, _amount = amount, _createdAt = createdAt, _updatedAt = updatedAt;
   
   factory PuffEvent({String? id, String? userId, TemporalTimestamp? time, String? json, String? cartridgeId, String? deviceId, int? duration, int? doseNumber, int? amount}) {
     return PuffEvent._internal(
@@ -127,14 +137,16 @@ class PuffEvent extends Model {
     buffer.write("deviceId=" + "$_deviceId" + ", ");
     buffer.write("duration=" + (_duration != null ? _duration!.toString() : "null") + ", ");
     buffer.write("doseNumber=" + (_doseNumber != null ? _doseNumber!.toString() : "null") + ", ");
-    buffer.write("amount=" + (_amount != null ? _amount!.toString() : "null"));
+    buffer.write("amount=" + (_amount != null ? _amount!.toString() : "null") + ", ");
+    buffer.write("createdAt=" + (_createdAt != null ? _createdAt!.format() : "null") + ", ");
+    buffer.write("updatedAt=" + (_updatedAt != null ? _updatedAt!.format() : "null"));
     buffer.write("}");
     
     return buffer.toString();
   }
   
   PuffEvent copyWith({String? id, String? userId, TemporalTimestamp? time, String? json, String? cartridgeId, String? deviceId, int? duration, int? doseNumber, int? amount}) {
-    return PuffEvent(
+    return PuffEvent._internal(
       id: id ?? this.id,
       userId: userId ?? this.userId,
       time: time ?? this.time,
@@ -155,10 +167,12 @@ class PuffEvent extends Model {
       _deviceId = json['deviceId'],
       _duration = (json['duration'] as num?)?.toInt(),
       _doseNumber = (json['doseNumber'] as num?)?.toInt(),
-      _amount = (json['amount'] as num?)?.toInt();
+      _amount = (json['amount'] as num?)?.toInt(),
+      _createdAt = json['createdAt'] != null ? TemporalDateTime.fromString(json['createdAt']) : null,
+      _updatedAt = json['updatedAt'] != null ? TemporalDateTime.fromString(json['updatedAt']) : null;
   
   Map<String, dynamic> toJson() => {
-    'id': id, 'userId': _userId, 'time': _time?.toSeconds(), 'json': _json, 'cartridgeId': _cartridgeId, 'deviceId': _deviceId, 'duration': _duration, 'doseNumber': _doseNumber, 'amount': _amount
+    'id': id, 'userId': _userId, 'time': _time?.toSeconds(), 'json': _json, 'cartridgeId': _cartridgeId, 'deviceId': _deviceId, 'duration': _duration, 'doseNumber': _doseNumber, 'amount': _amount, 'createdAt': _createdAt?.format(), 'updatedAt': _updatedAt?.format()
   };
 
   static final QueryField ID = QueryField(fieldName: "puffEvent.id");
@@ -233,6 +247,20 @@ class PuffEvent extends Model {
       key: PuffEvent.AMOUNT,
       isRequired: false,
       ofType: ModelFieldType(ModelFieldTypeEnum.int)
+    ));
+    
+    modelSchemaDefinition.addField(ModelFieldDefinition.nonQueryField(
+      fieldName: 'createdAt',
+      isRequired: false,
+      isReadOnly: true,
+      ofType: ModelFieldType(ModelFieldTypeEnum.dateTime)
+    ));
+    
+    modelSchemaDefinition.addField(ModelFieldDefinition.nonQueryField(
+      fieldName: 'updatedAt',
+      isRequired: false,
+      isReadOnly: true,
+      ofType: ModelFieldType(ModelFieldTypeEnum.dateTime)
     ));
   });
 }

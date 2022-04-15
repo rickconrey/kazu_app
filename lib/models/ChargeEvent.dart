@@ -19,7 +19,7 @@
 
 // ignore_for_file: public_member_api_docs, file_names, unnecessary_new, prefer_if_null_operators, prefer_const_constructors, slash_for_doc_comments, annotate_overrides, non_constant_identifier_names, unnecessary_string_interpolations, prefer_adjacent_string_concatenation, unnecessary_const, dead_code
 
-import 'package:amplify_datastore_plugin_interface/amplify_datastore_plugin_interface.dart';
+import 'package:amplify_core/amplify_core.dart';
 import 'package:flutter/foundation.dart';
 
 
@@ -34,6 +34,8 @@ class ChargeEvent extends Model {
   final String? _json;
   final String? _userId;
   final String? _deviceId;
+  final TemporalDateTime? _createdAt;
+  final TemporalDateTime? _updatedAt;
 
   @override
   getInstanceType() => classType;
@@ -67,7 +69,15 @@ class ChargeEvent extends Model {
     return _deviceId;
   }
   
-  const ChargeEvent._internal({required this.id, time, charging, adcVbat, json, userId, deviceId}): _time = time, _charging = charging, _adcVbat = adcVbat, _json = json, _userId = userId, _deviceId = deviceId;
+  TemporalDateTime? get createdAt {
+    return _createdAt;
+  }
+  
+  TemporalDateTime? get updatedAt {
+    return _updatedAt;
+  }
+  
+  const ChargeEvent._internal({required this.id, time, charging, adcVbat, json, userId, deviceId, createdAt, updatedAt}): _time = time, _charging = charging, _adcVbat = adcVbat, _json = json, _userId = userId, _deviceId = deviceId, _createdAt = createdAt, _updatedAt = updatedAt;
   
   factory ChargeEvent({String? id, TemporalTimestamp? time, bool? charging, int? adcVbat, String? json, String? userId, String? deviceId}) {
     return ChargeEvent._internal(
@@ -111,14 +121,16 @@ class ChargeEvent extends Model {
     buffer.write("adcVbat=" + (_adcVbat != null ? _adcVbat!.toString() : "null") + ", ");
     buffer.write("json=" + "$_json" + ", ");
     buffer.write("userId=" + "$_userId" + ", ");
-    buffer.write("deviceId=" + "$_deviceId");
+    buffer.write("deviceId=" + "$_deviceId" + ", ");
+    buffer.write("createdAt=" + (_createdAt != null ? _createdAt!.format() : "null") + ", ");
+    buffer.write("updatedAt=" + (_updatedAt != null ? _updatedAt!.format() : "null"));
     buffer.write("}");
     
     return buffer.toString();
   }
   
   ChargeEvent copyWith({String? id, TemporalTimestamp? time, bool? charging, int? adcVbat, String? json, String? userId, String? deviceId}) {
-    return ChargeEvent(
+    return ChargeEvent._internal(
       id: id ?? this.id,
       time: time ?? this.time,
       charging: charging ?? this.charging,
@@ -135,10 +147,12 @@ class ChargeEvent extends Model {
       _adcVbat = (json['adcVbat'] as num?)?.toInt(),
       _json = json['json'],
       _userId = json['userId'],
-      _deviceId = json['deviceId'];
+      _deviceId = json['deviceId'],
+      _createdAt = json['createdAt'] != null ? TemporalDateTime.fromString(json['createdAt']) : null,
+      _updatedAt = json['updatedAt'] != null ? TemporalDateTime.fromString(json['updatedAt']) : null;
   
   Map<String, dynamic> toJson() => {
-    'id': id, 'time': _time?.toSeconds(), 'charging': _charging, 'adcVbat': _adcVbat, 'json': _json, 'userId': _userId, 'deviceId': _deviceId
+    'id': id, 'time': _time?.toSeconds(), 'charging': _charging, 'adcVbat': _adcVbat, 'json': _json, 'userId': _userId, 'deviceId': _deviceId, 'createdAt': _createdAt?.format(), 'updatedAt': _updatedAt?.format()
   };
 
   static final QueryField ID = QueryField(fieldName: "chargeEvent.id");
@@ -199,6 +213,20 @@ class ChargeEvent extends Model {
       key: ChargeEvent.DEVICEID,
       isRequired: false,
       ofType: ModelFieldType(ModelFieldTypeEnum.string)
+    ));
+    
+    modelSchemaDefinition.addField(ModelFieldDefinition.nonQueryField(
+      fieldName: 'createdAt',
+      isRequired: false,
+      isReadOnly: true,
+      ofType: ModelFieldType(ModelFieldTypeEnum.dateTime)
+    ));
+    
+    modelSchemaDefinition.addField(ModelFieldDefinition.nonQueryField(
+      fieldName: 'updatedAt',
+      isRequired: false,
+      isReadOnly: true,
+      ofType: ModelFieldType(ModelFieldTypeEnum.dateTime)
     ));
   });
 }

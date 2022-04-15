@@ -1,9 +1,11 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:kazu_app/models/PuffEvent.dart';
 import 'package:kazu_app/models/ChargeEvent.dart';
 import 'package:kazu_app/models/CartridgeEvent.dart';
 import 'package:kazu_app/models/ResetEvent.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
+import 'package:intl/intl.dart';
 
 
 //Widget buildEventStream(BuildContext context) {
@@ -75,6 +77,7 @@ Widget buildEventCard(dynamic event) {
 
 Widget buildPuffEventCard(PuffEvent event) {
   var dateTime = DateTime.fromMillisecondsSinceEpoch(event.time!.toSeconds() * 1000);
+  var dateString = DateFormat.yMMMEd().add_jms().format(dateTime);
   return Card(
     margin: const EdgeInsets.symmetric(vertical: 5, horizontal: 30),
     child: ListTile(
@@ -84,11 +87,12 @@ Widget buildPuffEventCard(PuffEvent event) {
         color: Colors.deepPurple,
       ),
       //leading: const Icon(Icons.bolt),
-      title: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      title: Column(
+          //mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Text("Puff Event"),
-            Text("$dateTime"),
+            Text("$dateString"),
           ]
       ),
       subtitle: Row(

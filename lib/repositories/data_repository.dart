@@ -1,7 +1,8 @@
 import 'dart:convert';
 
 import 'package:amplify_datastore/amplify_datastore.dart';
-import 'package:amplify_flutter/amplify.dart';
+//import 'package:amplify_flutter/amplify.dart';
+import 'package:amplify_flutter/amplify_flutter.dart';
 import 'package:kazu_app/generated/telemetry.pb.dart';
 import 'package:kazu_app/models/PuffEvent.dart';
 import 'package:kazu_app/models/ChargeEvent.dart';
