@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_blue/flutter_blue.dart';
 import 'package:kazu_app/events/ble_event.dart';
+import 'package:kazu_app/generated/cartridge/mutable.pb.dart';
 import 'package:kazu_app/generated/telemetry.pb.dart';
 import 'package:kazu_app/generated/control.pb.dart';
 import 'package:kazu_app/models/User.dart';
@@ -80,26 +81,9 @@ class BleBloc extends Bloc<BleEvent, BleState> {
       //  print("MTU: $mtu");
       //}
 
-      Packet packet = Packet();
-      Map<String, bool> flags = {"requestAck": true, "encrypted": false, "compressed": false};
-      ControlEnvelope controlEnvelope = ControlEnvelope.create();
-      controlEnvelope.command = Command.SET_RTC;
-      RtcInformation rtcInformation = RtcInformation.create();
-      rtcInformation.time = DateTime.now().millisecondsSinceEpoch ~/ 1000;
-      print("Time: $rtcInformation.time");
-      SetRtc setRtc = SetRtc.create();
-      setRtc.rtcInformation = rtcInformation;
-      controlEnvelope.setRtc = setRtc;
-      //controlEnvelope.setRtc.rtcInformation.time = DateTime.now().millisecondsSinceEpoch ~/ 1000;
-      List<int> payload = controlEnvelope.writeToBuffer();
-      print("Payload: $payload");
-      List<List<int>>? txPackets = packet.buildTxPacket(streamId: PacketStreamIdEnum.control, flags: flags, payload: payload);
-      if (txPackets != null) {
-        for (List<int> message in txPackets) {
-          print("Adding message to BleTx: $message");
-          add(BleTx(message: message));
-        }
-      }
+
+      _sendGetRtcMessage();
+      _sendSetRtcMessage();
 
       await state.txNotify?.setNotifyValue(true);
       state.txNotify?.value.listen((value) async {
@@ -131,6 +115,245 @@ class BleBloc extends Bloc<BleEvent, BleState> {
       if (state.device != null) {
         await bleRepository.disconnectFromDevice(state.device!);
         yield state.copyWith(isConnected: false);
+      }
+    }
+  }
+
+  void _sendSetRtcMessage() {
+    Packet packet = Packet();
+    Map<String, bool> flags = {"requestAck": true, "encrypted": false, "compressed": false};
+    ControlEnvelope controlEnvelope = ControlEnvelope.create();
+    controlEnvelope.command = Command.SET_RTC;
+    RtcInformation rtcInformation = RtcInformation.create();
+    rtcInformation.time = DateTime.now().millisecondsSinceEpoch ~/ 1000;
+    print("Time: $rtcInformation.time");
+    SetRtc setRtc = SetRtc.create();
+    setRtc.rtcInformation = rtcInformation;
+    controlEnvelope.setRtc = setRtc;
+    //controlEnvelope.setRtc.rtcInformation.time = DateTime.now().millisecondsSinceEpoch ~/ 1000;
+    List<int> payload = controlEnvelope.writeToBuffer();
+    print("Payload: $payload");
+    List<List<int>>? txPackets = packet.buildTxPacket(streamId: PacketStreamIdEnum.control, flags: flags, payload: payload);
+    if (txPackets != null) {
+      for (List<int> message in txPackets) {
+        print("Adding message to BleTx: $message");
+        add(BleTx(message: message));
+      }
+    }
+  }
+
+  void _sendGetRtcMessage() {
+    Packet packet = Packet();
+    Map<String, bool> flags = {"requestAck": true, "encrypted": false, "compressed": false};
+    ControlEnvelope controlEnvelope = ControlEnvelope.create();
+    controlEnvelope.command = Command.GET_RTC;
+
+    // create payload
+    List<int> payload = controlEnvelope.writeToBuffer();
+    print("Payload: $payload");
+    List<List<int>>? txPackets = packet.buildTxPacket(streamId: PacketStreamIdEnum.control, flags: flags, payload: payload);
+
+    // add to queue message
+    if (txPackets != null) {
+      for (List<int> message in txPackets) {
+        print("Adding message to BleTx: $message");
+        add(BleTx(message: message));
+      }
+    }
+  }
+
+  void _sendGetCartStatusMessage() {
+    Packet packet = Packet();
+    Map<String, bool> flags = {"requestAck": true, "encrypted": false, "compressed": false};
+    ControlEnvelope controlEnvelope = ControlEnvelope.create();
+    controlEnvelope.command = Command.GET_CART_STATUS;
+
+    // create payload
+    List<int> payload = controlEnvelope.writeToBuffer();
+    print("Payload: $payload");
+    List<List<int>>? txPackets = packet.buildTxPacket(streamId: PacketStreamIdEnum.control, flags: flags, payload: payload);
+
+    // add to queue message
+    if (txPackets != null) {
+      for (List<int> message in txPackets) {
+        print("Adding message to BleTx: $message");
+        add(BleTx(message: message));
+      }
+    }
+  }
+
+  void _sendGetDeviceInformationMessage() {
+    Packet packet = Packet();
+    Map<String, bool> flags = {"requestAck": true, "encrypted": false, "compressed": false};
+    ControlEnvelope controlEnvelope = ControlEnvelope.create();
+    controlEnvelope.command = Command.GET_DEVICE_INFORMATION;
+
+    // create payload
+    List<int> payload = controlEnvelope.writeToBuffer();
+    print("Payload: $payload");
+    List<List<int>>? txPackets = packet.buildTxPacket(streamId: PacketStreamIdEnum.control, flags: flags, payload: payload);
+
+    // add to queue message
+    if (txPackets != null) {
+      for (List<int> message in txPackets) {
+        print("Adding message to BleTx: $message");
+        add(BleTx(message: message));
+      }
+    }
+  }
+
+  void _sendGetDosageMessage() {
+    Packet packet = Packet();
+    Map<String, bool> flags = {"requestAck": true, "encrypted": false, "compressed": false};
+    ControlEnvelope controlEnvelope = ControlEnvelope.create();
+    controlEnvelope.command = Command.GET_DOSAGE;
+
+    // create payload
+    List<int> payload = controlEnvelope.writeToBuffer();
+    print("Payload: $payload");
+    List<List<int>>? txPackets = packet.buildTxPacket(streamId: PacketStreamIdEnum.control, flags: flags, payload: payload);
+
+    // add to queue message
+    if (txPackets != null) {
+      for (List<int> message in txPackets) {
+        print("Adding message to BleTx: $message");
+        add(BleTx(message: message));
+      }
+    }
+  }
+
+  void _sendGetTemperatureMessage() {
+    Packet packet = Packet();
+    Map<String, bool> flags = {"requestAck": true, "encrypted": false, "compressed": false};
+    ControlEnvelope controlEnvelope = ControlEnvelope.create();
+    controlEnvelope.command = Command.GET_TEMPERATURE;
+
+    // create payload
+    List<int> payload = controlEnvelope.writeToBuffer();
+    print("Payload: $payload");
+    List<List<int>>? txPackets = packet.buildTxPacket(streamId: PacketStreamIdEnum.control, flags: flags, payload: payload);
+
+    // add to queue message
+    if (txPackets != null) {
+      for (List<int> message in txPackets) {
+        print("Adding message to BleTx: $message");
+        add(BleTx(message: message));
+      }
+    }
+  }
+
+  void _sendGetLockMessage() {
+    Packet packet = Packet();
+    Map<String, bool> flags = {"requestAck": true, "encrypted": false, "compressed": false};
+    ControlEnvelope controlEnvelope = ControlEnvelope.create();
+    controlEnvelope.command = Command.GET_LOCK;
+
+    // create payload
+    List<int> payload = controlEnvelope.writeToBuffer();
+    print("Payload: $payload");
+    List<List<int>>? txPackets = packet.buildTxPacket(streamId: PacketStreamIdEnum.control, flags: flags, payload: payload);
+
+    // add to queue message
+    if (txPackets != null) {
+      for (List<int> message in txPackets) {
+        print("Adding message to BleTx: $message");
+        add(BleTx(message: message));
+      }
+    }
+  }
+
+  void _sendSetDosageMessage(int dosage) {
+    Packet packet = Packet();
+    Map<String, bool> flags = {"requestAck": true, "encrypted": false, "compressed": false};
+    ControlEnvelope controlEnvelope = ControlEnvelope.create();
+    controlEnvelope.command = Command.SET_DOSAGE;
+
+    SetDosage setDosage = SetDosage.create();
+    setDosage.dosage = dosage;
+    controlEnvelope.setDosage = setDosage;
+
+    // create payload
+    List<int> payload = controlEnvelope.writeToBuffer();
+    print("Payload: $payload");
+    List<List<int>>? txPackets = packet.buildTxPacket(streamId: PacketStreamIdEnum.control, flags: flags, payload: payload);
+
+    // add to queue message
+    if (txPackets != null) {
+      for (List<int> message in txPackets) {
+        print("Adding message to BleTx: $message");
+        add(BleTx(message: message));
+      }
+    }
+  }
+
+  void _sendSetTemperatureMessage(int temperature) {
+    Packet packet = Packet();
+    Map<String, bool> flags = {"requestAck": true, "encrypted": false, "compressed": false};
+    ControlEnvelope controlEnvelope = ControlEnvelope.create();
+    controlEnvelope.command = Command.SET_TEMPERATURE;
+
+    SetTemperature setTemperature = SetTemperature.create();
+    setTemperature.temperature = temperature;
+    controlEnvelope.setTemperature = setTemperature;
+
+    // create payload
+    List<int> payload = controlEnvelope.writeToBuffer();
+    print("Payload: $payload");
+    List<List<int>>? txPackets = packet.buildTxPacket(streamId: PacketStreamIdEnum.control, flags: flags, payload: payload);
+
+    // add to queue message
+    if (txPackets != null) {
+      for (List<int> message in txPackets) {
+        print("Adding message to BleTx: $message");
+        add(BleTx(message: message));
+      }
+    }
+  }
+
+  void _sendSetLockMessage(LockStatus isLocked) {
+    Packet packet = Packet();
+    Map<String, bool> flags = {"requestAck": true, "encrypted": false, "compressed": false};
+    ControlEnvelope controlEnvelope = ControlEnvelope.create();
+    controlEnvelope.command = Command.SET_LOCK;
+
+    SetLock setLock = SetLock.create();
+    setLock.status = isLocked;
+    controlEnvelope.setLock = setLock;
+
+    // create payload
+    List<int> payload = controlEnvelope.writeToBuffer();
+    print("Payload: $payload");
+    List<List<int>>? txPackets = packet.buildTxPacket(streamId: PacketStreamIdEnum.control, flags: flags, payload: payload);
+
+    // add to queue message
+    if (txPackets != null) {
+      for (List<int> message in txPackets) {
+        print("Adding message to BleTx: $message");
+        add(BleTx(message: message));
+      }
+    }
+  }
+
+  void _sendSetCartStatusMessage(Mutable_StatusType status) {
+    Packet packet = Packet();
+    Map<String, bool> flags = {"requestAck": true, "encrypted": false, "compressed": false};
+    ControlEnvelope controlEnvelope = ControlEnvelope.create();
+    controlEnvelope.command = Command.SET_CART_STATUS;
+
+    SetCartStatus setCartStatus = SetCartStatus.create();
+    setCartStatus.status = status;
+    controlEnvelope.setCartStatus = setCartStatus;
+
+    // create payload
+    List<int> payload = controlEnvelope.writeToBuffer();
+    print("Payload: $payload");
+    List<List<int>>? txPackets = packet.buildTxPacket(streamId: PacketStreamIdEnum.control, flags: flags, payload: payload);
+
+    // add to queue message
+    if (txPackets != null) {
+      for (List<int> message in txPackets) {
+        print("Adding message to BleTx: $message");
+        add(BleTx(message: message));
       }
     }
   }

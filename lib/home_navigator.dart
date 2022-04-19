@@ -19,7 +19,7 @@ class HomeNavigator extends StatelessWidget {
                 return route.didPop(result);
               },
               pages: [
-                MaterialPage(child: (TodayView())),
+                const MaterialPage(child: (TodayView())),
                 if (state == HomeNavigatorState.profile)
                   MaterialPage(child: ProfileView()),
                 if (state == HomeNavigatorState.device)

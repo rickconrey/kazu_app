@@ -5,6 +5,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:kazu_app/cubit/home_navigator_cubit.dart';
 import 'package:kazu_app/profile/profile_bloc.dart';
 import 'package:kazu_app/profile/profile_event.dart';
 import 'package:kazu_app/profile/profile_state.dart';
@@ -81,6 +82,7 @@ class ProfileView extends StatelessWidget {
               _emailTile(),
               _descriptionTile(),
               if (state.isCurrentUser) _saveProfileChangesButton(),
+              if (state.isCurrentUser) _deviceButton(context),
             ],
           ),
         ),
@@ -230,6 +232,13 @@ class ProfileView extends StatelessWidget {
           ],)
       );
     }
+  }
+
+  Widget _deviceButton(BuildContext context) {
+    return ElevatedButton(
+      onPressed: () => BlocProvider.of<HomeNavigatorCubit>(context).showDevice(),
+      child: const Text('Add Device'),
+    );
   }
 
   void _showSnackBar(BuildContext context, String message) {

@@ -109,7 +109,7 @@ class TodayView extends StatelessWidget{
                 ]
               ),
               _buildUserFeed(totalHeight),
-              _deviceButton(context),
+              //_deviceButton(context),
             ],
           ),
         );
