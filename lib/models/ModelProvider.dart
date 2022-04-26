@@ -20,23 +20,32 @@
 // ignore_for_file: public_member_api_docs, file_names, unnecessary_new, prefer_if_null_operators, prefer_const_constructors, slash_for_doc_comments, annotate_overrides, non_constant_identifier_names, unnecessary_string_interpolations, prefer_adjacent_string_concatenation, unnecessary_const, dead_code
 
 import 'package:amplify_core/amplify_core.dart';
+import 'Cartridge.dart';
 import 'CartridgeEvent.dart';
 import 'ChargeEvent.dart';
+import 'Device.dart';
 import 'PuffEvent.dart';
 import 'ResetEvent.dart';
 import 'User.dart';
 
+export 'Cartridge.dart';
 export 'CartridgeEvent.dart';
+export 'CartridgeState.dart';
+export 'CartridgeStatus.dart';
+export 'CartridgeType.dart';
 export 'ChargeEvent.dart';
+export 'Device.dart';
+export 'DeviceLockStatus.dart';
+export 'ProductId.dart';
 export 'PuffEvent.dart';
 export 'ResetEvent.dart';
 export 'User.dart';
 
 class ModelProvider implements ModelProviderInterface {
   @override
-  String version = "d838916b86c691e239fdf935580135f9";
+  String version = "48855e1f8c2037c81cfb0de1046f005e";
   @override
-  List<ModelSchema> modelSchemas = [CartridgeEvent.schema, ChargeEvent.schema, PuffEvent.schema, ResetEvent.schema, User.schema];
+  List<ModelSchema> modelSchemas = [Cartridge.schema, CartridgeEvent.schema, ChargeEvent.schema, Device.schema, PuffEvent.schema, ResetEvent.schema, User.schema];
   static final ModelProvider _instance = ModelProvider();
   @override
   List<ModelSchema> customTypeSchemas = [];
@@ -45,10 +54,14 @@ class ModelProvider implements ModelProviderInterface {
   
   ModelType getModelTypeByModelName(String modelName) {
     switch(modelName) {
+      case "Cartridge":
+        return Cartridge.classType;
       case "CartridgeEvent":
         return CartridgeEvent.classType;
       case "ChargeEvent":
         return ChargeEvent.classType;
+      case "Device":
+        return Device.classType;
       case "PuffEvent":
         return PuffEvent.classType;
       case "ResetEvent":

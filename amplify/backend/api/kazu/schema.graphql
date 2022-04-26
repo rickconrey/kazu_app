@@ -1,3 +1,84 @@
+enum DeviceLockStatus {
+  UNKNOWN
+  UNLOCKED
+  LOCKED
+}
+
+enum CartridgeState {
+  UNKNOWN
+  ATTACHED
+  EJECTED
+  ERROR
+}
+
+enum CartridgeStatus {
+  UNKNOWN
+  NORMAL
+  EMPTY
+  RECALLED
+  EXPIRED
+  ERROR
+}
+
+enum ProductId {
+  UNKNOWN
+  KAZU
+  PERRIGO
+}
+
+enum CartridgeType {
+  UNKNOWN
+  VAPOR
+  ORAL
+}
+
+type Device @model @auth(rules: [{allow: public}]) {
+  id: ID!
+  deviceId: String
+  productId: ProductId
+  firmwareVersion: Int
+  imageLibraryVersion: Int
+  lastCartridge: String
+  cartridges: [ID]
+  motorId: Int
+  bleName: String
+  lockStatus: DeviceLockStatus
+}
+
+type Cartridge @model @auth(rules: [{allow: public}]) {
+  id: ID!
+  cartridgeId: String
+  type: CartridgeType
+  productId: ProductId
+  heaterId: Int
+  totalResistance: Int
+  coilResistance: Int
+  contactResistance: Int
+  measuredResistance: Int
+  temperatureCoefficient: Int
+  needleGauge: Int
+  volume: Int
+  fillerId: Int
+  liquidId: Int
+  maximumTemperature: Int
+  minimumTemperatu: Int
+  recommendedTemperature: Int
+  customTemperature: Int
+  filledTimestamp: AWSTimestamp
+  expireTimestamp: AWSTimestamp
+  logoKey: String
+  logoAddress: Int
+  logoLength: Int
+  version: Int
+  status: CartridgeStatus
+  state: CartridgeState
+  position: Int
+  doseNumber: Int
+  connectionTime: AWSTimestamp
+  lastDevice: String
+  devices: [ID]
+}
+
 type CartridgeEvent @model @auth(rules: [{allow: public}]) {
   id: ID!
   time: AWSTimestamp
