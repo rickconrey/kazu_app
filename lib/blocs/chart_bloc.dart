@@ -113,7 +113,7 @@ class ChartBloc extends Bloc<ChartEvent, ChartState> {
   }
 
   Future<List<TimeSeriesAmount>> _buildWeekData(DateTime now) async {
-    int startTime = DateTime(now.year, now.month, now.day).millisecondsSinceEpoch ~/ 1000;
+    int startTime = DateTime(now.year, now.month, now.day - 7).millisecondsSinceEpoch ~/ 1000;
     int endTime = DateTime(now.year, now.month, now.day + 1).millisecondsSinceEpoch ~/ 1000;
     String userId = user.id;
 
@@ -128,7 +128,7 @@ class ChartBloc extends Bloc<ChartEvent, ChartState> {
   }
 
   Future<List<TimeSeriesAmount>> _buildMonthData(DateTime now) async {
-    int startTime = DateTime(now.year, now.month, now.day).millisecondsSinceEpoch ~/ 1000;
+    int startTime = DateTime(now.year, now.month, now.day - 30).millisecondsSinceEpoch ~/ 1000;
     int endTime = DateTime(now.year, now.month, now.day + 1).millisecondsSinceEpoch ~/ 1000;
     String userId = user.id;
 
@@ -136,7 +136,7 @@ class ChartBloc extends Bloc<ChartEvent, ChartState> {
 
     List<TimeSeriesAmount> monthData = [];
     for (int i = 0; i < 30; i++) {
-      monthData.add(TimeSeriesAmount(time: i.toString(), amount: i));
+      monthData.add(TimeSeriesAmount(time: i.toString(), amount: 0));
     }
 
     return monthData;

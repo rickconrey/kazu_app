@@ -21,6 +21,13 @@ enum PacketStreamIdEnum {
   reserved2,
 }
 
+class PacketResult {
+  final int packetType;
+  final List<int> data;
+
+  PacketResult({required this.packetType, required this.data});
+}
+
 class Packet {
   static const int streamIdMask = 0x03;
   static const int transactionIdMask = 0x0F;
@@ -165,61 +172,62 @@ class ProcessPacket {
 
   ProcessPacket() : super();
 
-  List<int>? processPacket(Packet packet) {
-    if (packet.transactionType == TransactionTypeEnum.transactionInitial.index) {
-      transactionId = packet.transactionId;
-      streamId = packet.streamId;
-      bufferSize = packet.bufferSize;
-      sequenceNumber = packet.sequenceNumber;
-    }
+  PacketResult? processPacket(Packet packet) {
+  //  List<int>? processPacket(Packet packet) {
+      if (packet.transactionType == TransactionTypeEnum.transactionInitial.index) {
+        transactionId = packet.transactionId;
+        streamId = packet.streamId;
+        bufferSize = packet.bufferSize;
+        sequenceNumber = packet.sequenceNumber;
+      }
 
-    if (transactionId != packet.transactionId) {
-      print("Error, transactionId mismatch. $transactionId, ${packet.transactionId}");
-      reset();
-    }
-
-    if (streamId != packet.streamId) {
-      print("Error, streamId mismatch. $streamId, ${packet.streamId}");
-      reset();
-    }
-
-    if (sequenceNumber != packet.sequenceNumber) {
-      print("Error, sequenceNumber mismatch. $sequenceNumber, ${packet.sequenceNumber}");
-      reset();
-    }
-
-    data += packet.data;
-
-    sequenceNumber = (sequenceNumber + 1) & 0x0F;
-
-    print("Transaction Id $transactionId :: type ${packet.transactionType} :: stream id $streamId :: sequence number $sequenceNumber :: buffer size $bufferSize");
-    if (data.length == bufferSize) {
-      if (packet.transactionType == TransactionTypeEnum.transactionFinal.index ||
-          packet.transactionType == TransactionTypeEnum.transactionInitial.index)
-      {
-       print("Found complete packet of size $bufferSize");
-       List<int> result = List.from(data);
-       reset();
-       return result;
-      } else {
-        print("Error, invalid transaction");
+      if (transactionId != packet.transactionId) {
+        print("Error, transactionId mismatch. $transactionId, ${packet.transactionId}");
         reset();
       }
-      data.clear();
-      reset();
-    } else if (data.length > bufferSize) {
-      print("Error, invalid length, ${data.length}, $bufferSize");
-      data.clear();
-      reset();
-    }
-    return null;
-  }
 
-  void reset() {
-    transactionId = 0;
-    streamId = 0;
-    bufferSize = 0;
-    sequenceNumber = 0;
-    data.clear();
-  }
+      if (streamId != packet.streamId) {
+        print("Error, streamId mismatch. $streamId, ${packet.streamId}");
+        reset();
+      }
+
+      if (sequenceNumber != packet.sequenceNumber) {
+        print("Error, sequenceNumber mismatch. $sequenceNumber, ${packet.sequenceNumber}");
+        reset();
+      }
+
+      data += packet.data;
+
+      sequenceNumber = (sequenceNumber + 1) & 0x0F;
+
+      print("Transaction Id $transactionId :: type ${packet.transactionType} :: stream id $streamId :: sequence number $sequenceNumber :: buffer size $bufferSize");
+      if (data.length == bufferSize) {
+        if (packet.transactionType == TransactionTypeEnum.transactionFinal.index ||
+            packet.transactionType == TransactionTypeEnum.transactionInitial.index)
+        {
+          print("Found complete packet of size $bufferSize");
+          List<int> result = List.from(data);
+          reset();
+          return PacketResult(packetType: packet.streamId, data: result);
+        } else {
+          print("Error, invalid transaction");
+          reset();
+        }
+        data.clear();
+        reset();
+      } else if (data.length > bufferSize) {
+        print("Error, invalid length, ${data.length}, $bufferSize");
+        data.clear();
+        reset();
+      }
+      return null;
+    }
+
+    void reset() {
+      transactionId = 0;
+      streamId = 0;
+      bufferSize = 0;
+      sequenceNumber = 0;
+      data.clear();
+    }
 }

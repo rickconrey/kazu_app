@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:amplify_datastore/amplify_datastore.dart';
 //import 'package:amplify_flutter/amplify.dart';
 import 'package:amplify_flutter/amplify_flutter.dart';
+import 'package:kazu_app/generated/control.pb.dart';
 import 'package:kazu_app/generated/telemetry.pb.dart';
 import 'package:kazu_app/models/PuffEvent.dart';
 import 'package:kazu_app/models/ChargeEvent.dart';
@@ -10,6 +11,9 @@ import 'package:kazu_app/models/ResetEvent.dart';
 import 'package:kazu_app/models/CartridgeEvent.dart';
 import 'package:kazu_app/models/User.dart';
 import 'package:rxdart/rxdart.dart';
+
+import '../models/Cartridge.dart';
+import '../models/Device.dart';
 
 class DataRepository {
   Future<User?> getUserById(String userId) async {
@@ -43,6 +47,54 @@ class DataRepository {
     }
   }
 
+  Future<Device?> getDeviceByDeviceId({required String deviceId}) async {
+    try {
+      final devices = await Amplify.DataStore.query(
+        Device.classType,
+        where: Device.DEVICEID.eq(deviceId),
+      );
+      return devices.isNotEmpty ? devices.first : null;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<Device?> getDeviceById({required String id}) async {
+    try {
+      final devices = await Amplify.DataStore.query(
+        Device.classType,
+        where: Device.ID.eq(id),
+      );
+      return devices.isNotEmpty ? devices.first : null;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<Cartridge?> getCartridgeByCartridgeId({required String cartridgeId}) async {
+    try {
+      final cartridges = await Amplify.DataStore.query(
+        Cartridge.classType,
+        where: Cartridge.CARTRIDGEID.eq(cartridgeId),
+      );
+      return cartridges.isNotEmpty ? cartridges.first : null;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<Cartridge?> getCartridgeById({required String id}) async {
+    try {
+      final cartridges = await Amplify.DataStore.query(
+        Cartridge.classType,
+        where: Device.ID.eq(id),
+      );
+      return cartridges.isNotEmpty ? cartridges.first : null;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
   Future<void> createEvent({required String userId, required Telemetry telemetry}) async {
     switch (telemetry.whichPayload()) {
       case Telemetry_Payload.puffEvent:
@@ -57,6 +109,22 @@ class DataRepository {
       case Telemetry_Payload.resetEvent:
         createResetEvent(userId: userId, telemetry: telemetry);
         break;
+    }
+  }
+
+  Future<void> processControlResponse({required String userId, required ControlEnvelope controlEnvelope}) async {
+    print(controlEnvelope);
+    if (controlEnvelope.whichPayload() == ControlEnvelope_Payload.response) {
+      switch (controlEnvelope.response.whichPayload()) {
+        case Response_Payload.deviceInformation:
+          break;
+        case Response_Payload.rtcInformation:
+          break;
+        case Response_Payload.cartridgeInformation:
+          break;
+        default:
+          break;
+      }
     }
   }
 

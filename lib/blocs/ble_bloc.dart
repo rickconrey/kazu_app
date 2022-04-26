@@ -82,22 +82,32 @@ class BleBloc extends Bloc<BleEvent, BleState> {
       //}
 
 
-      _sendGetRtcMessage();
-      _sendSetRtcMessage();
+      //_sendGetRtcMessage();
+      _sendGetDeviceInformationMessage();
+      //_sendSetRtcMessage();
 
       await state.txNotify?.setNotifyValue(true);
       state.txNotify?.value.listen((value) async {
         if (value.isNotEmpty) {
           if (state.tx != null) {
-            List<int>? data = await bleRepository.readFromDevice(state.tx!, state.bleLock);
+            //List<int>? data = await bleRepository.readFromDevice(state.tx!, state.bleLock);
+            PacketResult? data = await bleRepository.readFromDevice(state.tx!, state.bleLock);
             if (data != null) {
-              Cobs cobs = Cobs();
-              List<int> results = cobs.decode(data);
-              Telemetry telemetry = Telemetry.fromBuffer(results);
-              dataRepository.createEvent(
-                userId: state.user?.id ?? "0",
-                telemetry: telemetry,
-              );
+              if (data.packetType == PacketStreamIdEnum.data.index) {
+                Cobs cobs = Cobs();
+                List<int> results = cobs.decode(data.data);
+                Telemetry telemetry = Telemetry.fromBuffer(results);
+                dataRepository.createEvent(
+                  userId: state.user?.id ?? "0",
+                  telemetry: telemetry,
+                );
+              } else if (data.packetType == PacketStreamIdEnum.control.index) {
+                ControlEnvelope control = ControlEnvelope.fromBuffer(data.data);
+                dataRepository.processControlResponse(
+                    userId: state.user?.id ?? "0",
+                    controlEnvelope: control,
+                );
+              }
             }
           }
         }

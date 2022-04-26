@@ -89,7 +89,7 @@ class TodayView extends StatelessWidget{
                       //    .of(context)
                       //    .size
                       //    .height * 0.4,
-                      child: s.todayData != null
+                      child: s.monthData != null
                           ? buildMonthChart(s.monthData!, s.monthTicks!)
                           : const CircularProgressIndicator(),
                     ),

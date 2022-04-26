@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:kazu_app/profile/profile_view.dart';
 import 'package:kazu_app/views/scan_view.dart';
 import 'package:kazu_app/views/today_view.dart';
+import 'package:kazu_app/views/device_view.dart';
 
 import 'cubit/home_navigator_cubit.dart';
 
@@ -23,7 +24,9 @@ class HomeNavigator extends StatelessWidget {
                 if (state == HomeNavigatorState.profile)
                   MaterialPage(child: ProfileView()),
                 if (state == HomeNavigatorState.device)
-                  MaterialPage(child: ScanView())
+                  MaterialPage(child: DeviceView()),
+                if (state == HomeNavigatorState.scan)
+                  MaterialPage(child: ScanView()),
               ],
             );
           }),

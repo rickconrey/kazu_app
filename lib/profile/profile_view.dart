@@ -81,7 +81,8 @@ class ProfileView extends StatelessWidget {
               _usernameTile(),
               _emailTile(),
               _descriptionTile(),
-              if (state.isCurrentUser) _saveProfileChangesButton(),
+              if (state.isCurrentUser) ListTile(subtitle: _saveProfileChangesButton()),
+              const SizedBox(height: 150),
               if (state.isCurrentUser) _deviceButton(context),
             ],
           ),
@@ -237,7 +238,7 @@ class ProfileView extends StatelessWidget {
   Widget _deviceButton(BuildContext context) {
     return ElevatedButton(
       onPressed: () => BlocProvider.of<HomeNavigatorCubit>(context).showDevice(),
-      child: const Text('Add Device'),
+      child: const Text('Device'),
     );
   }
 
