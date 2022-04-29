@@ -84,7 +84,7 @@ class BleBloc extends Bloc<BleEvent, BleState> {
 
       //_sendGetRtcMessage();
       _sendGetDeviceInformationMessage();
-      //_sendSetRtcMessage();
+      _sendSetRtcMessage();
 
       await state.txNotify?.setNotifyValue(true);
       state.txNotify?.value.listen((value) async {
