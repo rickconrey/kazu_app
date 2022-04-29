@@ -1,6 +1,8 @@
+import 'dart:async';
 import 'dart:io';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_blue/flutter_blue.dart';
+//import 'package:flutter_blue/flutter_blue.dart';
+import 'package:flutter_reactive_ble/flutter_reactive_ble.dart';
 import 'package:kazu_app/events/ble_event.dart';
 import 'package:kazu_app/generated/cartridge/mutable.pb.dart';
 import 'package:kazu_app/generated/telemetry.pb.dart';
@@ -16,10 +18,16 @@ import '../utils/packet.dart';
 class BleBloc extends Bloc<BleEvent, BleState> {
   final BleRepository bleRepository;
   final DataRepository dataRepository;
-  final Guid kazuServiceUuid = Guid("c6f9b530-b0b1-b2f4-5769-7469f5b2b1b0");
-  final Guid kazuTxUuid = Guid("c6f9b531-b0b1-b2f4-5769-7469f5b2b1b0");
-  final Guid kazuTxNotifyUuid = Guid("c6f9b532-b0b1-b2f4-5769-7469f5b2b1b0");
-  final Guid kazuRxUuid = Guid("c6f9b533-b0b1-b2f4-5769-7469f5b2b1b0");
+  //final Guid kazuServiceUuid = Guid("c6f9b530-b0b1-b2f4-5769-7469f5b2b1b0");
+  //final Guid kazuTxUuid = Guid("c6f9b531-b0b1-b2f4-5769-7469f5b2b1b0");
+  //final Guid kazuTxNotifyUuid = Guid("c6f9b532-b0b1-b2f4-5769-7469f5b2b1b0");
+  //final Guid kazuRxUuid = Guid("c6f9b533-b0b1-b2f4-5769-7469f5b2b1b0");
+  //final Guid kazuUpdateUuid = Guid("8D53DC1D-1DB7-4CD3-868B-8A527460AA84");
+  final Uuid kazuUpdateUuid = Uuid([0x8d, 0x53, 0xdc, 0x1d, 0x1d, 0xb7, 0x4c, 0xd3, 0x86, 0x8b, 0x8a, 0x52, 0x74, 0x60, 0xaa, 0x84]);
+  final Uuid kazuServiceUuid = Uuid([0xc6, 0xf9, 0xb5, 0x30, 0xb0, 0xb1, 0xb2, 0xf4, 0x57, 0x69, 0x74, 0x69, 0xf5, 0xb2, 0xb1, 0xb0]);
+  final Uuid kazuTxUuid = Uuid([0xc6, 0xf9, 0xb5, 0x31, 0xb0, 0xb1, 0xb2, 0xf4, 0x57, 0x69, 0x74, 0x69, 0xf5, 0xb2, 0xb1, 0xb0]);
+  final Uuid kazuTxNotifyUuid = Uuid([0xc6, 0xf9, 0xb5, 0x32, 0xb0, 0xb1, 0xb2, 0xf4, 0x57, 0x69, 0x74, 0x69, 0xf5, 0xb2, 0xb1, 0xb0]);
+  final Uuid kazuRxUuid = Uuid([0xc6, 0xf9, 0xb5, 0x33, 0xb0, 0xb1, 0xb2, 0xf4, 0x57, 0x69, 0x74, 0x69, 0xf5, 0xb2, 0xb1, 0xb0]);
 
   BleBloc({
     required this.bleRepository,
@@ -29,47 +37,90 @@ class BleBloc extends Bloc<BleEvent, BleState> {
   @override
   Stream<BleState> mapEventToState(BleEvent event) async* {
     if (event is BleScanRequest) {
-      List<ScanResult> scanResults = [];
+      List<DiscoveredDevice> scanResults = [];
       yield state.copyWith(scanResults: scanResults);
-      var scanListener = bleRepository.ble.scan(withServices: [Guid("8D53DC1D-1DB7-4CD3-868B-8A527460AA84")], timeout: const Duration(seconds: 4)).listen((result) {
-        add(BleScanResult(result: result));
+      var scanListener = bleRepository.scan([kazuUpdateUuid]).listen((device) {
+        add(BleScanResult(result: device));
       });
-
+      yield state.copyWith(scanner: scanListener);
     } else if (event is BleScanResult) {
-      List<ScanResult> results = state.scanResults ?? [];
-      if (results.contains(event.result) == false) {
-        results.add(event.result!);
+      List<DiscoveredDevice> results = state.scanResults ?? [];
+      for (int i = 0; i < results.length; i++) {
+        if (results[i].id == event.result!.id) {
+          results.removeAt(i);
+          results.insert(i, event.result!);
+          yield state.copyWith(scanResults: results);
+          return;
+        }
       }
+      results.add(event.result!);
       yield state.copyWith(scanResults: results);
 
     } else if (event is BleConnectRequest) {
-      yield state.copyWith(device: event.device.device, user: event.user);
-      await state.device?.connect();
-      await state.device?.requestMtu(128);
-      List<BluetoothService>? services = await state.device?.discoverServices();
-      for (BluetoothService service in services!) {
-        if (service.uuid == kazuServiceUuid) {
+      yield state.copyWith(device: event.device, user: event.user);
+      Stream<ConnectionStateUpdate>? stream;
+      if (state.device != null) {
+        stream = bleRepository.connect(state.device!);
+      }
+
+      if (stream != null) {
+        StreamSubscription<ConnectionStateUpdate>? connection = stream.listen((
+            update) {
+          add(BleConnectionEvent(update: update));
+        });
+
+        yield state.copyWith(connection: connection);
+      }
+
+    } else if (event is BleConnectionEvent) {
+      if (event.update.connectionState == DeviceConnectionState.connected) {
+        add(BleConnected());
+      }
+      yield state.copyWith(state: event.update.connectionState);
+    } else if (event is BleConnected) {
+      int mtu = await bleRepository.requestMtu(deviceId: state.device!.id, mtu: 128);
+      print(mtu);
+
+      List<DiscoveredService> services = await bleRepository.getServices(deviceId: state.device!.id);
+      for (DiscoveredService service in services) {
+        if (service.serviceId == kazuServiceUuid) {
           print("Found kazu service: $kazuServiceUuid");
-          for (BluetoothCharacteristic characteristic in service.characteristics) {
-            if (characteristic.uuid == kazuRxUuid) {
+          for (DiscoveredCharacteristic characteristic in service.characteristics) {
+            if (characteristic.characteristicId == kazuRxUuid) {
               print("Found kazu Rx");
-              yield state.copyWith(rx: characteristic);
-            } else if (characteristic.uuid == kazuTxNotifyUuid) {
+              yield state.copyWith(
+                  rx: characteristic,
+                  qcRx: QualifiedCharacteristic(
+                      characteristicId: characteristic.characteristicId,
+                      serviceId: service.serviceId,
+                      deviceId: state.device!.id,
+                  )
+              );
+            } else if (characteristic.characteristicId == kazuTxNotifyUuid) {
               print("Found kazu TxNotify");
-              yield state.copyWith(txNotify: characteristic);
-            } else if (characteristic.uuid == kazuTxUuid) {
+              yield state.copyWith(
+                  txNotify: characteristic,
+                  qcTxNotify: QualifiedCharacteristic(
+                      characteristicId: characteristic.characteristicId,
+                      serviceId: service.serviceId,
+                      deviceId: state.device!.id,
+                  ),
+              );
+            } else if (characteristic.characteristicId == kazuTxUuid) {
               print("Found kazu Tx");
-              yield state.copyWith(tx: characteristic);
+              yield state.copyWith(
+                  tx: characteristic,
+                  qcTx: QualifiedCharacteristic(
+                      characteristicId: characteristic.characteristicId,
+                      serviceId: service.serviceId,
+                      deviceId: state.device!.id,
+                ),
+              );
             }
           }
         }
       }
       yield state.copyWith(services: services);
-
-      add(BleConnected());
-
-    } else if (event is BleConnected) {
-      yield state.copyWith(isConnected: true);
       //yield state.copyWith(result: {"")
 
       //state.device?.requestMtu(42);
@@ -83,15 +134,18 @@ class BleBloc extends Bloc<BleEvent, BleState> {
 
 
       //_sendGetRtcMessage();
-      _sendGetDeviceInformationMessage();
+      //_sendGetDeviceInformationMessage();
       _sendSetRtcMessage();
 
-      await state.txNotify?.setNotifyValue(true);
-      state.txNotify?.value.listen((value) async {
+      //await state.txNotify?.setNotifyValue(true);
+      Stream<List<int>> rxNotifications = bleRepository.subscribeToNotification(qc: state.qcTxNotify!);
+      rxNotifications.listen((value) async {
         if (value.isNotEmpty) {
-          if (state.tx != null) {
+          if (state.qcTx != null) {
             //List<int>? data = await bleRepository.readFromDevice(state.tx!, state.bleLock);
-            PacketResult? data = await bleRepository.readFromDevice(state.tx!, state.bleLock);
+            //PacketResult? data = await bleRepository.readFromDevice(state.tx!, state.bleLock);
+            PacketResult? data = await bleRepository.readFromDevice(state.qcTx!, state.bleLock);
+            //List<int>? data = await bleRepository.read(qc: state.qcTx!);
             if (data != null) {
               if (data.packetType == PacketStreamIdEnum.data.index) {
                 Cobs cobs = Cobs();
@@ -114,17 +168,25 @@ class BleBloc extends Bloc<BleEvent, BleState> {
       });
     } else if (event is BleTx) {
       try {
-        if (event.message != null) {
-          await state.rx?.write(event.message!);
+        if (event.message != null && state.qcRx != null) {
+          //await state.rx?.write(event.message!);
+          await bleRepository.write(qc: state.qcRx!, value: event.message!);
         }
       } catch (e) {
         rethrow;
       }
     } else if (event is BleDisconnected) {
-      state.txNotify?.setNotifyValue(false);
-      if (state.device != null) {
-        await bleRepository.disconnectFromDevice(state.device!);
-        yield state.copyWith(isConnected: false);
+      if (state.device != null && state.connection != null) {
+        await bleRepository.disconnectFromDevice(state.connection!);
+        add(
+            BleConnectionEvent(
+              update: ConnectionStateUpdate(
+                deviceId: state.device!.id,
+                connectionState: DeviceConnectionState.disconnected,
+                failure: null,
+              )
+            )
+        );
       }
     }
   }
