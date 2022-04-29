@@ -5,6 +5,7 @@ import 'package:amplify_datastore/amplify_datastore.dart';
 import 'package:amplify_flutter/amplify_flutter.dart';
 import 'package:kazu_app/generated/control.pb.dart';
 import 'package:kazu_app/generated/telemetry.pb.dart';
+import 'package:kazu_app/models/DeviceLockStatus.dart';
 import 'package:kazu_app/models/PuffEvent.dart';
 import 'package:kazu_app/models/ChargeEvent.dart';
 import 'package:kazu_app/models/ResetEvent.dart';
@@ -47,6 +48,73 @@ class DataRepository {
     }
   }
 
+  Future<Device> createDeviceFromProto({required DeviceInformation information, required String userId}) async {
+    Device device;
+    String deviceId = "";
+    for (int i in information.id) {
+      deviceId += i.toRadixString(16).padLeft(2, '0') + ":";
+    }
+    deviceId = deviceId.substring(0, deviceId.length - 1);
+    Device? savedDevice = await getDeviceByDeviceId(deviceId: deviceId);
+    DeviceLockStatus lockStatus;
+    switch (information.lockStatus) {
+      case LockStatus.LOCKED:
+        lockStatus = DeviceLockStatus.LOCKED;
+        break;
+      case LockStatus.UNLOCKED:
+        lockStatus = DeviceLockStatus.UNLOCKED;
+        break;
+      default:
+        lockStatus = DeviceLockStatus.UNKNOWN;
+        break;
+    }
+    int vbat = (((information.adcData.vbat << 1) * 1000) ~/ 1365);
+
+    if (savedDevice == null) {
+      device = Device(
+        userId: userId,
+        deviceId: deviceId,
+        imageLibraryVersion: information.imageLibraryVersion,
+        firmwareVersion: information.firmwareVersion,
+        dose: information.dosage,
+        temperature: information.temperature,
+        lockStatus: lockStatus,
+        batteryLevel: vbat,
+        bleName: information.bleName,
+        lastSynced: TemporalTimestamp.now(),
+      );
+    } else {
+      device = savedDevice.copyWith(
+        userId: userId,
+        deviceId: deviceId,
+        imageLibraryVersion: information.imageLibraryVersion,
+        firmwareVersion: information.firmwareVersion,
+        dose: information.dosage,
+        temperature: information.temperature,
+        lockStatus: lockStatus,
+        batteryLevel: vbat,
+        bleName: information.bleName,
+        lastSynced: TemporalTimestamp.now(),
+      );
+    }
+
+    try {
+      await Amplify.DataStore.save(device);
+      return device;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<Device> updateDevice(Device device) async {
+    try {
+      await Amplify.DataStore.save(device);
+      return device;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
   Future<Device?> getDeviceByDeviceId({required String deviceId}) async {
     try {
       final devices = await Amplify.DataStore.query(
@@ -54,6 +122,19 @@ class DataRepository {
         where: Device.DEVICEID.eq(deviceId),
       );
       return devices.isNotEmpty ? devices.first : null;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<String?> getDeviceIdByUserId({required String userId}) async {
+    try {
+      final devices = await Amplify.DataStore.query(
+        Device.classType,
+        where: Device.USERID.eq(userId),
+        sortBy: [Device.LASTSYNCED.descending()],
+      );
+      return devices.isNotEmpty ? devices.first.deviceId : null;
     } catch (e) {
       rethrow;
     }
@@ -117,6 +198,10 @@ class DataRepository {
     if (controlEnvelope.whichPayload() == ControlEnvelope_Payload.response) {
       switch (controlEnvelope.response.whichPayload()) {
         case Response_Payload.deviceInformation:
+          createDeviceFromProto(
+            information: controlEnvelope.response.deviceInformation,
+            userId: userId,
+          );
           break;
         case Response_Payload.rtcInformation:
           break;
@@ -133,7 +218,7 @@ class DataRepository {
       String json = jsonEncode(telemetry.toProto3Json());
       TemporalTimestamp time = TemporalTimestamp.fromSeconds(
           telemetry.time);
-      String deviceId = "0"; // todo: get device id
+      String deviceId = await getDeviceIdByUserId(userId: userId) ?? "";
       bool lowpower = telemetry.resetEvent.lowpower;
       bool watchdog = telemetry.resetEvent.iwdg;
       bool brownout = telemetry.resetEvent.bor;
@@ -175,11 +260,16 @@ class DataRepository {
       String json = jsonEncode(telemetry.toProto3Json());
       TemporalTimestamp time = TemporalTimestamp.fromSeconds(
           telemetry.time);
-      String deviceId = "0"; // todo: get device id
+      String deviceId = await getDeviceIdByUserId(userId: userId) ?? "";
       int doseNumber = telemetry.cartridgeEvent.doseNumber;
       int position = telemetry.cartridgeEvent.encoderPosition;
       int measuredResistance = telemetry.cartridgeEvent.measuredResistance;
-      List<int> cartridgeId = telemetry.cartridgeEvent.cartridgeId;
+      //List<int> cartridgeId = telemetry.cartridgeEvent.cartridgeId;
+      String cartridgeId = ""; //telemetry.cartridgeEvent.cartridgeId;
+      for (int i in telemetry.cartridgeEvent.cartridgeId) {
+        cartridgeId += i.toRadixString(16).padLeft(2, '0') + ":";
+      }
+      cartridgeId = cartridgeId.substring(0, cartridgeId.length - 1);
       bool attached = telemetry.cartridgeEvent.cartDetected;
       bool empty = telemetry.cartridgeEvent.empty;
 
@@ -187,7 +277,7 @@ class DataRepository {
         userId: userId,
         id: UUID.getUUID(),
         deviceId: deviceId,
-        cartridgeId: cartridgeId.toString(),
+        cartridgeId: cartridgeId,
         attached: attached,
         empty: empty,
         time: time,
@@ -208,7 +298,7 @@ class DataRepository {
       String json = jsonEncode(telemetry.toProto3Json());
       TemporalTimestamp time = TemporalTimestamp.fromSeconds(
           telemetry.time);
-      String deviceId = "0"; // todo: get device id
+      String deviceId = await getDeviceIdByUserId(userId: userId) ?? "";
       int adcVbat = telemetry.chargeEvent.adcVbat;
       bool charging = telemetry.chargeEvent.usbDetected;
 
@@ -233,8 +323,15 @@ class DataRepository {
       String json = jsonEncode(telemetry.toProto3Json());
       TemporalTimestamp time = TemporalTimestamp.fromSeconds(
           telemetry.time);
-      List<int> cartridgeId = telemetry.puffEvent.cartridgeId;
-      String deviceId = "0"; // todo: get device id
+      //List<int> cartridgeId = telemetry.puffEvent.cartridgeId;
+      String cartridgeId = ""; //telemetry.cartridgeEvent.cartridgeId;
+      for (int i in telemetry.cartridgeEvent.cartridgeId) {
+        cartridgeId += i.toRadixString(16).padLeft(2, '0') + ":";
+      }
+      if (cartridgeId.length > 1) {
+        cartridgeId = cartridgeId.substring(0, cartridgeId.length - 1);
+      }
+      String deviceId = await getDeviceIdByUserId(userId: userId) ?? "";
       int duration = telemetry.puffEvent.duration;
       int doseNumber = telemetry.puffEvent.doseNumber;
       int amount = telemetry.puffEvent.amount;
@@ -242,7 +339,7 @@ class DataRepository {
       final event = PuffEvent(
         userId: userId,
         id: UUID.getUUID(),
-        cartridgeId: cartridgeId.toString(),
+        cartridgeId: cartridgeId,
         deviceId: deviceId,
         time: time,
         json: json,
@@ -341,6 +438,14 @@ class DataRepository {
     );
   }
 
+  Stream<QuerySnapshot<Device>> deviceStream(String userId) {
+    return Amplify.DataStore.observeQuery(
+      Device.classType,
+      where: Device.USERID.eq(userId),
+      sortBy: [Device.LASTSYNCED.descending()],
+    );
+  }
+
   //Stream<QuerySnapshot> getEventsStream() {
   //  Stream<QuerySnapshot<PuffEvent>> _puffStream = puffEventStream();
   //  Stream<QuerySnapshot<CartridgeEvent>> _cartridgeStream = cartridgeEventStream();
@@ -366,6 +471,12 @@ class DataRepository {
     Stream<QuerySnapshot<ResetEvent>> _resetStream = resetEventStream(userId, false);
 
     return Rx.merge([_puffStream, _cartridgeStream, _chargeStream, _resetStream]);
+  }
+
+  Stream<QuerySnapshot> getDeviceStreamByUserId(String userId) {
+    Stream<QuerySnapshot<Device>> _deviceStream = deviceStream(userId);
+
+    return _deviceStream;
   }
 
   //void startEventStreamListener() {
