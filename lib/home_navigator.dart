@@ -16,7 +16,22 @@ class HomeNavigator extends StatelessWidget {
           builder: (context, state) {
             return Navigator(
               onPopPage: (route, result) {
-                context.read<HomeNavigatorCubit>().showHome();
+                switch (state) {
+                  case HomeNavigatorState.profile:
+                    context.read<HomeNavigatorCubit>().showHome();
+                    break;
+                  case HomeNavigatorState.device:
+                    context.read<HomeNavigatorCubit>().showProfile();
+                    break;
+                  case HomeNavigatorState.scan:
+                    context.read<HomeNavigatorCubit>().showProfile();
+                    break;
+                  case HomeNavigatorState.home:
+                  default:
+                    context.read<HomeNavigatorCubit>().showHome();
+                    break;
+                }
+                //context.read<HomeNavigatorCubit>().showHome();
                 return route.didPop(result);
               },
               pages: [
