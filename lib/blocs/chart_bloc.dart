@@ -58,10 +58,10 @@ class ChartBloc extends Bloc<ChartEvent, ChartState> {
 
     List<charts.TickSpec<String>> chartTicks = [];
     for (int i = 0; i < 7; i++) {
-      charts.TickSpec(
+      chartTicks.add(charts.TickSpec(
         i.toString(),
         label: DateFormat('E').format(dateList[i]),
-      );
+      ));
     }
 
     return chartTicks;
@@ -113,30 +113,80 @@ class ChartBloc extends Bloc<ChartEvent, ChartState> {
   }
 
   Future<List<TimeSeriesAmount>> _buildWeekData(DateTime now) async {
-    int startTime = DateTime(now.year, now.month, now.day - 7).millisecondsSinceEpoch ~/ 1000;
-    int endTime = DateTime(now.year, now.month, now.day + 1).millisecondsSinceEpoch ~/ 1000;
     String userId = user.id;
-
-    List<PuffEvent>? events = await dataRepository.getPuffEventsByDateRange(userId, startTime, endTime);
 
     List<TimeSeriesAmount> weekData = [];
     for (int i = 0; i < 7; i++) {
       weekData.add(TimeSeriesAmount(time: i.toString(), amount: 0));
+      int startTime = DateTime(now.year, now.month, now.day - (6 - i)).millisecondsSinceEpoch ~/ 1000;
+      int endTime = DateTime(now.year, now.month, now.day - (5 - i)).millisecondsSinceEpoch ~/ 1000;
+      List<PuffEvent>? events = await dataRepository.getPuffEventsByDateRange(userId, startTime, endTime);
+      if (events != null) {
+        int daySum = 0;
+        daySum = events.fold(0, (sum, item) => sum + item.amount!);
+        weekData[i].amount = daySum;
+      }
     }
 
     return weekData;
   }
 
   Future<List<TimeSeriesAmount>> _buildMonthData(DateTime now) async {
-    int startTime = DateTime(now.year, now.month, now.day - 30).millisecondsSinceEpoch ~/ 1000;
-    int endTime = DateTime(now.year, now.month, now.day + 1).millisecondsSinceEpoch ~/ 1000;
     String userId = user.id;
-
-    List<PuffEvent>? events = await dataRepository.getPuffEventsByDateRange(userId, startTime, endTime);
 
     List<TimeSeriesAmount> monthData = [];
     for (int i = 0; i < 30; i++) {
       monthData.add(TimeSeriesAmount(time: i.toString(), amount: 0));
+      int startTime = DateTime(now.year, now.month, now.day - (29 - i)).millisecondsSinceEpoch ~/ 1000;
+      int endTime = DateTime(now.year, now.month, now.day - (28 - i)).millisecondsSinceEpoch ~/ 1000;
+      List<PuffEvent>? events = await dataRepository.getPuffEventsByDateRange(userId, startTime, endTime);
+      if (events != null) {
+        int daySum = 0;
+        daySum = events.fold(0, (sum, item) => sum + item.amount!);
+        monthData[i].amount = daySum;
+      }
+    }
+
+    return monthData;
+  }
+
+  Future<List<TimeSeriesAmount>> _updateTodayData(PuffEvent event, List<TimeSeriesAmount> todayData) async {
+    DateTime now = DateTime.now();
+    int startTime = DateTime(now.year, now.month, now.day).millisecondsSinceEpoch ~/ 1000;
+    int endTime = DateTime(now.year, now.month, now.day + 1).millisecondsSinceEpoch ~/ 1000;
+    if (event.time!.toSeconds() > startTime && event.time!.toSeconds() < endTime) {
+      int hour = DateTime
+          .fromMillisecondsSinceEpoch(event.time!.toSeconds() * 1000)
+          .hour;
+      todayData[hour].amount += (event.amount ?? 0);
+    }
+
+    return todayData;
+  }
+
+  Future<List<TimeSeriesAmount>> _updateWeekData(PuffEvent event, List<TimeSeriesAmount> weekData) async {
+    DateTime now = DateTime.now();
+    int startTime = DateTime(now.year, now.month, now.day - 7).millisecondsSinceEpoch ~/ 1000;
+    int endTime = DateTime(now.year, now.month, now.day + 1).millisecondsSinceEpoch ~/ 1000;
+    if (event.time!.toSeconds() > startTime && event.time!.toSeconds() < endTime) {
+      int day = DateTime
+          .fromMillisecondsSinceEpoch(event.time!.toSeconds() * 1000)
+          .day;
+      //weekData[day].amount += (event.amount ?? 0);
+    }
+
+    return weekData;
+  }
+
+  Future<List<TimeSeriesAmount>> _updateMonthData(PuffEvent event, List<TimeSeriesAmount> monthData) async {
+    DateTime now = DateTime.now();
+    int startTime = DateTime(now.year, now.month, now.day - 30).millisecondsSinceEpoch ~/ 1000;
+    int endTime = DateTime(now.year, now.month, now.day + 1).millisecondsSinceEpoch ~/ 1000;
+    if (event.time!.toSeconds() > startTime && event.time!.toSeconds() < endTime) {
+      int day = DateTime
+          .fromMillisecondsSinceEpoch(event.time!.toSeconds() * 1000)
+          .day;
+      monthData[day].amount += (event.amount ?? 0);
     }
 
     return monthData;
@@ -145,7 +195,6 @@ class ChartBloc extends Bloc<ChartEvent, ChartState> {
   @override
   Stream<ChartState> mapEventToState(ChartEvent event) async* {
     if (event is ChartInitializeData) {
-      //TemporalDateTime now = TemporalDateTime.now();
       DateTime now = DateTime.now();
 
       List<charts.TickSpec<String>> todayTicks = _buildTodayTicks();
@@ -167,12 +216,25 @@ class ChartBloc extends Bloc<ChartEvent, ChartState> {
       );
     } else if (event is ChartUpdateData) {
       List<TimeSeriesAmount> todayData = state.todayData ?? [];
+      List<TimeSeriesAmount> weekData = state.weekData ?? [];
+      List<TimeSeriesAmount> monthData = state.monthData ?? [];
 
       if (event.event.time != null) {
-        int hour = DateTime.fromMillisecondsSinceEpoch(event.event.time!.toSeconds() * 1000).hour;
-        todayData[hour].amount += (event.event.amount ?? 0);
+
+        todayData = await _updateTodayData(event.event, todayData);
+        weekData = await _updateWeekData(event.event, weekData);
+        monthData = await _updateMonthData(event.event, monthData);
+        //DateTime now = DateTime.now();
+        //int startTime = DateTime(now.year, now.month, now.day).millisecondsSinceEpoch ~/ 1000;
+        //int endTime = DateTime(now.year, now.month, now.day + 1).millisecondsSinceEpoch ~/ 1000;
+        //if (event.event.time!.toSeconds() > startTime && event.event.time!.toSeconds() < endTime) {
+        //  int hour = DateTime
+        //      .fromMillisecondsSinceEpoch(event.event.time!.toSeconds() * 1000)
+        //      .hour;
+        //  todayData[hour].amount += (event.event.amount ?? 0);
+        //}
       }
-      yield state.copyWith(todayData: todayData);
+      yield state.copyWith(todayData: todayData, weekData: weekData, monthData: monthData);
     }
   }
 }
