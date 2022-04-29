@@ -43,6 +43,11 @@ type Device @model @auth(rules: [{allow: public}]) {
   motorId: Int
   bleName: String
   lockStatus: DeviceLockStatus
+  lastSynced: AWSTimestamp
+  userId: ID
+  dose: Int
+  temperature: Int
+  batteryLevel: Int
 }
 
 type Cartridge @model @auth(rules: [{allow: public}]) {
@@ -77,6 +82,7 @@ type Cartridge @model @auth(rules: [{allow: public}]) {
   connectionTime: AWSTimestamp
   lastDevice: String
   devices: [ID]
+  userId: ID
 }
 
 type CartridgeEvent @model @auth(rules: [{allow: public}]) {

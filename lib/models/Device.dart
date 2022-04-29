@@ -39,6 +39,11 @@ class Device extends Model {
   final int? _motorId;
   final String? _bleName;
   final DeviceLockStatus? _lockStatus;
+  final TemporalTimestamp? _lastSynced;
+  final String? _userId;
+  final int? _dose;
+  final int? _temperature;
+  final int? _batteryLevel;
   final TemporalDateTime? _createdAt;
   final TemporalDateTime? _updatedAt;
 
@@ -86,6 +91,26 @@ class Device extends Model {
     return _lockStatus;
   }
   
+  TemporalTimestamp? get lastSynced {
+    return _lastSynced;
+  }
+  
+  String? get userId {
+    return _userId;
+  }
+  
+  int? get dose {
+    return _dose;
+  }
+  
+  int? get temperature {
+    return _temperature;
+  }
+  
+  int? get batteryLevel {
+    return _batteryLevel;
+  }
+  
   TemporalDateTime? get createdAt {
     return _createdAt;
   }
@@ -94,9 +119,9 @@ class Device extends Model {
     return _updatedAt;
   }
   
-  const Device._internal({required this.id, deviceId, productId, firmwareVersion, imageLibraryVersion, lastCartridge, cartridges, motorId, bleName, lockStatus, createdAt, updatedAt}): _deviceId = deviceId, _productId = productId, _firmwareVersion = firmwareVersion, _imageLibraryVersion = imageLibraryVersion, _lastCartridge = lastCartridge, _cartridges = cartridges, _motorId = motorId, _bleName = bleName, _lockStatus = lockStatus, _createdAt = createdAt, _updatedAt = updatedAt;
+  const Device._internal({required this.id, deviceId, productId, firmwareVersion, imageLibraryVersion, lastCartridge, cartridges, motorId, bleName, lockStatus, lastSynced, userId, dose, temperature, batteryLevel, createdAt, updatedAt}): _deviceId = deviceId, _productId = productId, _firmwareVersion = firmwareVersion, _imageLibraryVersion = imageLibraryVersion, _lastCartridge = lastCartridge, _cartridges = cartridges, _motorId = motorId, _bleName = bleName, _lockStatus = lockStatus, _lastSynced = lastSynced, _userId = userId, _dose = dose, _temperature = temperature, _batteryLevel = batteryLevel, _createdAt = createdAt, _updatedAt = updatedAt;
   
-  factory Device({String? id, String? deviceId, ProductId? productId, int? firmwareVersion, int? imageLibraryVersion, String? lastCartridge, List<String>? cartridges, int? motorId, String? bleName, DeviceLockStatus? lockStatus}) {
+  factory Device({String? id, String? deviceId, ProductId? productId, int? firmwareVersion, int? imageLibraryVersion, String? lastCartridge, List<String>? cartridges, int? motorId, String? bleName, DeviceLockStatus? lockStatus, TemporalTimestamp? lastSynced, String? userId, int? dose, int? temperature, int? batteryLevel}) {
     return Device._internal(
       id: id == null ? UUID.getUUID() : id,
       deviceId: deviceId,
@@ -107,7 +132,12 @@ class Device extends Model {
       cartridges: cartridges != null ? List<String>.unmodifiable(cartridges) : cartridges,
       motorId: motorId,
       bleName: bleName,
-      lockStatus: lockStatus);
+      lockStatus: lockStatus,
+      lastSynced: lastSynced,
+      userId: userId,
+      dose: dose,
+      temperature: temperature,
+      batteryLevel: batteryLevel);
   }
   
   bool equals(Object other) {
@@ -127,7 +157,12 @@ class Device extends Model {
       DeepCollectionEquality().equals(_cartridges, other._cartridges) &&
       _motorId == other._motorId &&
       _bleName == other._bleName &&
-      _lockStatus == other._lockStatus;
+      _lockStatus == other._lockStatus &&
+      _lastSynced == other._lastSynced &&
+      _userId == other._userId &&
+      _dose == other._dose &&
+      _temperature == other._temperature &&
+      _batteryLevel == other._batteryLevel;
   }
   
   @override
@@ -148,6 +183,11 @@ class Device extends Model {
     buffer.write("motorId=" + (_motorId != null ? _motorId!.toString() : "null") + ", ");
     buffer.write("bleName=" + "$_bleName" + ", ");
     buffer.write("lockStatus=" + (_lockStatus != null ? enumToString(_lockStatus)! : "null") + ", ");
+    buffer.write("lastSynced=" + (_lastSynced != null ? _lastSynced!.toString() : "null") + ", ");
+    buffer.write("userId=" + "$_userId" + ", ");
+    buffer.write("dose=" + (_dose != null ? _dose!.toString() : "null") + ", ");
+    buffer.write("temperature=" + (_temperature != null ? _temperature!.toString() : "null") + ", ");
+    buffer.write("batteryLevel=" + (_batteryLevel != null ? _batteryLevel!.toString() : "null") + ", ");
     buffer.write("createdAt=" + (_createdAt != null ? _createdAt!.format() : "null") + ", ");
     buffer.write("updatedAt=" + (_updatedAt != null ? _updatedAt!.format() : "null"));
     buffer.write("}");
@@ -155,7 +195,7 @@ class Device extends Model {
     return buffer.toString();
   }
   
-  Device copyWith({String? id, String? deviceId, ProductId? productId, int? firmwareVersion, int? imageLibraryVersion, String? lastCartridge, List<String>? cartridges, int? motorId, String? bleName, DeviceLockStatus? lockStatus}) {
+  Device copyWith({String? id, String? deviceId, ProductId? productId, int? firmwareVersion, int? imageLibraryVersion, String? lastCartridge, List<String>? cartridges, int? motorId, String? bleName, DeviceLockStatus? lockStatus, TemporalTimestamp? lastSynced, String? userId, int? dose, int? temperature, int? batteryLevel}) {
     return Device._internal(
       id: id ?? this.id,
       deviceId: deviceId ?? this.deviceId,
@@ -166,7 +206,12 @@ class Device extends Model {
       cartridges: cartridges ?? this.cartridges,
       motorId: motorId ?? this.motorId,
       bleName: bleName ?? this.bleName,
-      lockStatus: lockStatus ?? this.lockStatus);
+      lockStatus: lockStatus ?? this.lockStatus,
+      lastSynced: lastSynced ?? this.lastSynced,
+      userId: userId ?? this.userId,
+      dose: dose ?? this.dose,
+      temperature: temperature ?? this.temperature,
+      batteryLevel: batteryLevel ?? this.batteryLevel);
   }
   
   Device.fromJson(Map<String, dynamic> json)  
@@ -180,11 +225,16 @@ class Device extends Model {
       _motorId = (json['motorId'] as num?)?.toInt(),
       _bleName = json['bleName'],
       _lockStatus = enumFromString<DeviceLockStatus>(json['lockStatus'], DeviceLockStatus.values),
+      _lastSynced = json['lastSynced'] != null ? TemporalTimestamp.fromSeconds(json['lastSynced']) : null,
+      _userId = json['userId'],
+      _dose = (json['dose'] as num?)?.toInt(),
+      _temperature = (json['temperature'] as num?)?.toInt(),
+      _batteryLevel = (json['batteryLevel'] as num?)?.toInt(),
       _createdAt = json['createdAt'] != null ? TemporalDateTime.fromString(json['createdAt']) : null,
       _updatedAt = json['updatedAt'] != null ? TemporalDateTime.fromString(json['updatedAt']) : null;
   
   Map<String, dynamic> toJson() => {
-    'id': id, 'deviceId': _deviceId, 'productId': enumToString(_productId), 'firmwareVersion': _firmwareVersion, 'imageLibraryVersion': _imageLibraryVersion, 'lastCartridge': _lastCartridge, 'cartridges': _cartridges, 'motorId': _motorId, 'bleName': _bleName, 'lockStatus': enumToString(_lockStatus), 'createdAt': _createdAt?.format(), 'updatedAt': _updatedAt?.format()
+    'id': id, 'deviceId': _deviceId, 'productId': enumToString(_productId), 'firmwareVersion': _firmwareVersion, 'imageLibraryVersion': _imageLibraryVersion, 'lastCartridge': _lastCartridge, 'cartridges': _cartridges, 'motorId': _motorId, 'bleName': _bleName, 'lockStatus': enumToString(_lockStatus), 'lastSynced': _lastSynced?.toSeconds(), 'userId': _userId, 'dose': _dose, 'temperature': _temperature, 'batteryLevel': _batteryLevel, 'createdAt': _createdAt?.format(), 'updatedAt': _updatedAt?.format()
   };
 
   static final QueryField ID = QueryField(fieldName: "device.id");
@@ -197,6 +247,11 @@ class Device extends Model {
   static final QueryField MOTORID = QueryField(fieldName: "motorId");
   static final QueryField BLENAME = QueryField(fieldName: "bleName");
   static final QueryField LOCKSTATUS = QueryField(fieldName: "lockStatus");
+  static final QueryField LASTSYNCED = QueryField(fieldName: "lastSynced");
+  static final QueryField USERID = QueryField(fieldName: "userId");
+  static final QueryField DOSE = QueryField(fieldName: "dose");
+  static final QueryField TEMPERATURE = QueryField(fieldName: "temperature");
+  static final QueryField BATTERYLEVEL = QueryField(fieldName: "batteryLevel");
   static var schema = Model.defineSchema(define: (ModelSchemaDefinition modelSchemaDefinition) {
     modelSchemaDefinition.name = "Device";
     modelSchemaDefinition.pluralName = "Devices";
@@ -267,6 +322,36 @@ class Device extends Model {
       key: Device.LOCKSTATUS,
       isRequired: false,
       ofType: ModelFieldType(ModelFieldTypeEnum.enumeration)
+    ));
+    
+    modelSchemaDefinition.addField(ModelFieldDefinition.field(
+      key: Device.LASTSYNCED,
+      isRequired: false,
+      ofType: ModelFieldType(ModelFieldTypeEnum.timestamp)
+    ));
+    
+    modelSchemaDefinition.addField(ModelFieldDefinition.field(
+      key: Device.USERID,
+      isRequired: false,
+      ofType: ModelFieldType(ModelFieldTypeEnum.string)
+    ));
+    
+    modelSchemaDefinition.addField(ModelFieldDefinition.field(
+      key: Device.DOSE,
+      isRequired: false,
+      ofType: ModelFieldType(ModelFieldTypeEnum.int)
+    ));
+    
+    modelSchemaDefinition.addField(ModelFieldDefinition.field(
+      key: Device.TEMPERATURE,
+      isRequired: false,
+      ofType: ModelFieldType(ModelFieldTypeEnum.int)
+    ));
+    
+    modelSchemaDefinition.addField(ModelFieldDefinition.field(
+      key: Device.BATTERYLEVEL,
+      isRequired: false,
+      ofType: ModelFieldType(ModelFieldTypeEnum.int)
     ));
     
     modelSchemaDefinition.addField(ModelFieldDefinition.nonQueryField(

@@ -60,6 +60,7 @@ class Cartridge extends Model {
   final TemporalTimestamp? _connectionTime;
   final String? _lastDevice;
   final List<String>? _devices;
+  final String? _userId;
   final TemporalDateTime? _createdAt;
   final TemporalDateTime? _updatedAt;
 
@@ -191,6 +192,10 @@ class Cartridge extends Model {
     return _devices;
   }
   
+  String? get userId {
+    return _userId;
+  }
+  
   TemporalDateTime? get createdAt {
     return _createdAt;
   }
@@ -199,9 +204,9 @@ class Cartridge extends Model {
     return _updatedAt;
   }
   
-  const Cartridge._internal({required this.id, cartridgeId, type, productId, heaterId, totalResistance, coilResistance, contactResistance, measuredResistance, temperatureCoefficient, needleGauge, volume, fillerId, liquidId, maximumTemperature, minimumTemperatu, recommendedTemperature, customTemperature, filledTimestamp, expireTimestamp, logoKey, logoAddress, logoLength, version, status, state, position, doseNumber, connectionTime, lastDevice, devices, createdAt, updatedAt}): _cartridgeId = cartridgeId, _type = type, _productId = productId, _heaterId = heaterId, _totalResistance = totalResistance, _coilResistance = coilResistance, _contactResistance = contactResistance, _measuredResistance = measuredResistance, _temperatureCoefficient = temperatureCoefficient, _needleGauge = needleGauge, _volume = volume, _fillerId = fillerId, _liquidId = liquidId, _maximumTemperature = maximumTemperature, _minimumTemperatu = minimumTemperatu, _recommendedTemperature = recommendedTemperature, _customTemperature = customTemperature, _filledTimestamp = filledTimestamp, _expireTimestamp = expireTimestamp, _logoKey = logoKey, _logoAddress = logoAddress, _logoLength = logoLength, _version = version, _status = status, _state = state, _position = position, _doseNumber = doseNumber, _connectionTime = connectionTime, _lastDevice = lastDevice, _devices = devices, _createdAt = createdAt, _updatedAt = updatedAt;
+  const Cartridge._internal({required this.id, cartridgeId, type, productId, heaterId, totalResistance, coilResistance, contactResistance, measuredResistance, temperatureCoefficient, needleGauge, volume, fillerId, liquidId, maximumTemperature, minimumTemperatu, recommendedTemperature, customTemperature, filledTimestamp, expireTimestamp, logoKey, logoAddress, logoLength, version, status, state, position, doseNumber, connectionTime, lastDevice, devices, userId, createdAt, updatedAt}): _cartridgeId = cartridgeId, _type = type, _productId = productId, _heaterId = heaterId, _totalResistance = totalResistance, _coilResistance = coilResistance, _contactResistance = contactResistance, _measuredResistance = measuredResistance, _temperatureCoefficient = temperatureCoefficient, _needleGauge = needleGauge, _volume = volume, _fillerId = fillerId, _liquidId = liquidId, _maximumTemperature = maximumTemperature, _minimumTemperatu = minimumTemperatu, _recommendedTemperature = recommendedTemperature, _customTemperature = customTemperature, _filledTimestamp = filledTimestamp, _expireTimestamp = expireTimestamp, _logoKey = logoKey, _logoAddress = logoAddress, _logoLength = logoLength, _version = version, _status = status, _state = state, _position = position, _doseNumber = doseNumber, _connectionTime = connectionTime, _lastDevice = lastDevice, _devices = devices, _userId = userId, _createdAt = createdAt, _updatedAt = updatedAt;
   
-  factory Cartridge({String? id, String? cartridgeId, CartridgeType? type, ProductId? productId, int? heaterId, int? totalResistance, int? coilResistance, int? contactResistance, int? measuredResistance, int? temperatureCoefficient, int? needleGauge, int? volume, int? fillerId, int? liquidId, int? maximumTemperature, int? minimumTemperatu, int? recommendedTemperature, int? customTemperature, TemporalTimestamp? filledTimestamp, TemporalTimestamp? expireTimestamp, String? logoKey, int? logoAddress, int? logoLength, int? version, CartridgeStatus? status, CartridgeState? state, int? position, int? doseNumber, TemporalTimestamp? connectionTime, String? lastDevice, List<String>? devices}) {
+  factory Cartridge({String? id, String? cartridgeId, CartridgeType? type, ProductId? productId, int? heaterId, int? totalResistance, int? coilResistance, int? contactResistance, int? measuredResistance, int? temperatureCoefficient, int? needleGauge, int? volume, int? fillerId, int? liquidId, int? maximumTemperature, int? minimumTemperatu, int? recommendedTemperature, int? customTemperature, TemporalTimestamp? filledTimestamp, TemporalTimestamp? expireTimestamp, String? logoKey, int? logoAddress, int? logoLength, int? version, CartridgeStatus? status, CartridgeState? state, int? position, int? doseNumber, TemporalTimestamp? connectionTime, String? lastDevice, List<String>? devices, String? userId}) {
     return Cartridge._internal(
       id: id == null ? UUID.getUUID() : id,
       cartridgeId: cartridgeId,
@@ -233,7 +238,8 @@ class Cartridge extends Model {
       doseNumber: doseNumber,
       connectionTime: connectionTime,
       lastDevice: lastDevice,
-      devices: devices != null ? List<String>.unmodifiable(devices) : devices);
+      devices: devices != null ? List<String>.unmodifiable(devices) : devices,
+      userId: userId);
   }
   
   bool equals(Object other) {
@@ -274,7 +280,8 @@ class Cartridge extends Model {
       _doseNumber == other._doseNumber &&
       _connectionTime == other._connectionTime &&
       _lastDevice == other._lastDevice &&
-      DeepCollectionEquality().equals(_devices, other._devices);
+      DeepCollectionEquality().equals(_devices, other._devices) &&
+      _userId == other._userId;
   }
   
   @override
@@ -316,6 +323,7 @@ class Cartridge extends Model {
     buffer.write("connectionTime=" + (_connectionTime != null ? _connectionTime!.toString() : "null") + ", ");
     buffer.write("lastDevice=" + "$_lastDevice" + ", ");
     buffer.write("devices=" + (_devices != null ? _devices!.toString() : "null") + ", ");
+    buffer.write("userId=" + "$_userId" + ", ");
     buffer.write("createdAt=" + (_createdAt != null ? _createdAt!.format() : "null") + ", ");
     buffer.write("updatedAt=" + (_updatedAt != null ? _updatedAt!.format() : "null"));
     buffer.write("}");
@@ -323,7 +331,7 @@ class Cartridge extends Model {
     return buffer.toString();
   }
   
-  Cartridge copyWith({String? id, String? cartridgeId, CartridgeType? type, ProductId? productId, int? heaterId, int? totalResistance, int? coilResistance, int? contactResistance, int? measuredResistance, int? temperatureCoefficient, int? needleGauge, int? volume, int? fillerId, int? liquidId, int? maximumTemperature, int? minimumTemperatu, int? recommendedTemperature, int? customTemperature, TemporalTimestamp? filledTimestamp, TemporalTimestamp? expireTimestamp, String? logoKey, int? logoAddress, int? logoLength, int? version, CartridgeStatus? status, CartridgeState? state, int? position, int? doseNumber, TemporalTimestamp? connectionTime, String? lastDevice, List<String>? devices}) {
+  Cartridge copyWith({String? id, String? cartridgeId, CartridgeType? type, ProductId? productId, int? heaterId, int? totalResistance, int? coilResistance, int? contactResistance, int? measuredResistance, int? temperatureCoefficient, int? needleGauge, int? volume, int? fillerId, int? liquidId, int? maximumTemperature, int? minimumTemperatu, int? recommendedTemperature, int? customTemperature, TemporalTimestamp? filledTimestamp, TemporalTimestamp? expireTimestamp, String? logoKey, int? logoAddress, int? logoLength, int? version, CartridgeStatus? status, CartridgeState? state, int? position, int? doseNumber, TemporalTimestamp? connectionTime, String? lastDevice, List<String>? devices, String? userId}) {
     return Cartridge._internal(
       id: id ?? this.id,
       cartridgeId: cartridgeId ?? this.cartridgeId,
@@ -355,7 +363,8 @@ class Cartridge extends Model {
       doseNumber: doseNumber ?? this.doseNumber,
       connectionTime: connectionTime ?? this.connectionTime,
       lastDevice: lastDevice ?? this.lastDevice,
-      devices: devices ?? this.devices);
+      devices: devices ?? this.devices,
+      userId: userId ?? this.userId);
   }
   
   Cartridge.fromJson(Map<String, dynamic> json)  
@@ -390,11 +399,12 @@ class Cartridge extends Model {
       _connectionTime = json['connectionTime'] != null ? TemporalTimestamp.fromSeconds(json['connectionTime']) : null,
       _lastDevice = json['lastDevice'],
       _devices = json['devices']?.cast<String>(),
+      _userId = json['userId'],
       _createdAt = json['createdAt'] != null ? TemporalDateTime.fromString(json['createdAt']) : null,
       _updatedAt = json['updatedAt'] != null ? TemporalDateTime.fromString(json['updatedAt']) : null;
   
   Map<String, dynamic> toJson() => {
-    'id': id, 'cartridgeId': _cartridgeId, 'type': enumToString(_type), 'productId': enumToString(_productId), 'heaterId': _heaterId, 'totalResistance': _totalResistance, 'coilResistance': _coilResistance, 'contactResistance': _contactResistance, 'measuredResistance': _measuredResistance, 'temperatureCoefficient': _temperatureCoefficient, 'needleGauge': _needleGauge, 'volume': _volume, 'fillerId': _fillerId, 'liquidId': _liquidId, 'maximumTemperature': _maximumTemperature, 'minimumTemperatu': _minimumTemperatu, 'recommendedTemperature': _recommendedTemperature, 'customTemperature': _customTemperature, 'filledTimestamp': _filledTimestamp?.toSeconds(), 'expireTimestamp': _expireTimestamp?.toSeconds(), 'logoKey': _logoKey, 'logoAddress': _logoAddress, 'logoLength': _logoLength, 'version': _version, 'status': enumToString(_status), 'state': enumToString(_state), 'position': _position, 'doseNumber': _doseNumber, 'connectionTime': _connectionTime?.toSeconds(), 'lastDevice': _lastDevice, 'devices': _devices, 'createdAt': _createdAt?.format(), 'updatedAt': _updatedAt?.format()
+    'id': id, 'cartridgeId': _cartridgeId, 'type': enumToString(_type), 'productId': enumToString(_productId), 'heaterId': _heaterId, 'totalResistance': _totalResistance, 'coilResistance': _coilResistance, 'contactResistance': _contactResistance, 'measuredResistance': _measuredResistance, 'temperatureCoefficient': _temperatureCoefficient, 'needleGauge': _needleGauge, 'volume': _volume, 'fillerId': _fillerId, 'liquidId': _liquidId, 'maximumTemperature': _maximumTemperature, 'minimumTemperatu': _minimumTemperatu, 'recommendedTemperature': _recommendedTemperature, 'customTemperature': _customTemperature, 'filledTimestamp': _filledTimestamp?.toSeconds(), 'expireTimestamp': _expireTimestamp?.toSeconds(), 'logoKey': _logoKey, 'logoAddress': _logoAddress, 'logoLength': _logoLength, 'version': _version, 'status': enumToString(_status), 'state': enumToString(_state), 'position': _position, 'doseNumber': _doseNumber, 'connectionTime': _connectionTime?.toSeconds(), 'lastDevice': _lastDevice, 'devices': _devices, 'userId': _userId, 'createdAt': _createdAt?.format(), 'updatedAt': _updatedAt?.format()
   };
 
   static final QueryField ID = QueryField(fieldName: "cartridge.id");
@@ -428,6 +438,7 @@ class Cartridge extends Model {
   static final QueryField CONNECTIONTIME = QueryField(fieldName: "connectionTime");
   static final QueryField LASTDEVICE = QueryField(fieldName: "lastDevice");
   static final QueryField DEVICES = QueryField(fieldName: "devices");
+  static final QueryField USERID = QueryField(fieldName: "userId");
   static var schema = Model.defineSchema(define: (ModelSchemaDefinition modelSchemaDefinition) {
     modelSchemaDefinition.name = "Cartridge";
     modelSchemaDefinition.pluralName = "Cartridges";
@@ -624,6 +635,12 @@ class Cartridge extends Model {
       isRequired: false,
       isArray: true,
       ofType: ModelFieldType(ModelFieldTypeEnum.collection, ofModelName: describeEnum(ModelFieldTypeEnum.string))
+    ));
+    
+    modelSchemaDefinition.addField(ModelFieldDefinition.field(
+      key: Cartridge.USERID,
+      isRequired: false,
+      ofType: ModelFieldType(ModelFieldTypeEnum.string)
     ));
     
     modelSchemaDefinition.addField(ModelFieldDefinition.nonQueryField(
