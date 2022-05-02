@@ -125,7 +125,10 @@ class _AppState extends State<KazuApp> {
 
   Future<void> _permissions() async {
     try {
-      if (await Permission.bluetoothScan.request().isGranted && await Permission.bluetoothConnect.request().isGranted) {
+      if (await Permission.bluetoothScan.request().isGranted &&
+          await Permission.bluetoothConnect.request().isGranted &&
+          await Permission.locationWhenInUse.request().isGranted
+      ) {
         setState(() => _isPermissionGranted = true);
       }
 

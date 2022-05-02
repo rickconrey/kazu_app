@@ -1,21 +1,29 @@
-import 'package:flutter_blue/flutter_blue.dart';
+import 'package:flutter_reactive_ble/flutter_reactive_ble.dart';
 import 'package:kazu_app/models/User.dart';
 
 abstract class BleEvent {}
 
 class BleUnknown extends BleEvent {}
 class BleScanResult extends BleEvent {
-  final ScanResult? result;
+  //final ScanResult? result;
+  final DiscoveredDevice? result;
 
   BleScanResult({this.result});
 }
 class BleScanRequest extends BleEvent {}
 
 class BleConnectRequest extends BleEvent {
-  final ScanResult device;
+  final DiscoveredDevice device;
+  //final ScanResult device;
   final User user;
 
   BleConnectRequest({required this.device, required this.user});
+}
+
+class BleConnectionEvent extends BleEvent {
+  final ConnectionStateUpdate update;
+
+  BleConnectionEvent({required this.update});
 }
 
 class BleConnected extends BleEvent {}

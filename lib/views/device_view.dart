@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_reactive_ble/flutter_reactive_ble.dart';
 import 'package:kazu_app/events/device_event.dart';
 import 'package:kazu_app/generated/control.pb.dart';
 import 'package:kazu_app/models/ModelProvider.dart';
@@ -29,7 +30,7 @@ class DeviceView extends StatelessWidget {
 
         },
         child: BlocBuilder<DeviceBloc, DeviceState>(builder: (context, state) {
-          final bleConnected = context.select((BleBloc bloc) => bloc.state.isConnected);
+          final bleConnected = context.select((BleBloc bloc) => (bloc.state.state == DeviceConnectionState.connected));
           if (state.device == null || bleConnected == false) {
             return Scaffold(
               appBar: AppBar(

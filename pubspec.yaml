@@ -34,6 +34,8 @@ dependencies:
     path: ./flutter_blue
   rxdart:
 
+  flutter_reactive_ble: ^5.0.2
+
   charts_flutter:
 
   flutter_bloc: <7.2.0

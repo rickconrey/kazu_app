@@ -53,7 +53,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
 
       try {
         await dataRepository.updateUser(updatedUser);
-        yield state.copyWith(formStatus: SubmissionSuccess());
+        yield state.copyWith(formStatus: SubmissionSuccess(), userDescription: updatedUser.description);
       } on Exception catch (e) {
         yield state.copyWith(formStatus: SubmissionFailed(e));
       }
