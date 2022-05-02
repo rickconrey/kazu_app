@@ -34,8 +34,8 @@ class FeedView extends StatelessWidget {
       String _avatarPath = state.userAvatarPaths?[userId] ?? _dummyAvatar;
 
       return GestureDetector(
-        onTap: () {
-          context.read<SessionCubit>().selectUser(userId);
+        onTap: () async {
+          await context.read<SessionCubit>().selectUser(userId);
           BlocProvider.of<FeedNavigatorCubit>(context).showProfile();
           },
         child: Row(

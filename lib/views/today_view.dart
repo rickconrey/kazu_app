@@ -34,9 +34,9 @@ class TodayView extends StatelessWidget{
         var appBar = AppBar(
           title: const Text("Kazu"),
           leading: IconButton(
-          onPressed: () {
-          context.read<SessionCubit>().selectUser(null);
-          BlocProvider.of<HomeNavigatorCubit>(context).showProfile();
+          onPressed: ()  async {
+            await context.read<SessionCubit>().selectUser(context.read<SessionCubit>().currentUser.id);
+            BlocProvider.of<HomeNavigatorCubit>(context).showProfile();
           },
           icon: const Icon(Icons.person),
           ),
