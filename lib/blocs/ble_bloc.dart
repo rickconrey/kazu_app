@@ -13,6 +13,7 @@ import 'package:kazu_app/repositories/data_repository.dart';
 import 'package:kazu_app/states/ble_state.dart';
 import 'package:kazu_app/utils/cobs.dart';
 
+import '../models/Device.dart';
 import '../utils/packet.dart';
 
 class BleBloc extends Bloc<BleEvent, BleState> {
@@ -32,11 +33,29 @@ class BleBloc extends Bloc<BleEvent, BleState> {
   BleBloc({
     required this.bleRepository,
     required this.dataRepository,
-  }) : super (BleState());
+  }) : super (BleState()) {
+    //add(BleAttemptAutoConnect());
+    add(BleUnknown());
+  }
 
   @override
   Stream<BleState> mapEventToState(BleEvent event) async* {
-    if (event is BleScanRequest) {
+    if (event is BleUnknown) {
+      bleRepository.ble.statusStream.listen((event) {
+        print("Ble status: " + event.name);
+      });
+      bleRepository.ble.connectedDeviceStream.listen((event) {
+        print("Ble Connect Device: " + event.connectionState.name);
+      });
+    }
+    if (event is BleAttemptAutoConnect) {
+      yield state.copyWith(user: event.user);
+      Device? device = await dataRepository.getDeviceByUserId(
+          userId: state.user!.id);
+      if (device != null) {
+        add(BleConnectRequest(device: device.bleId!, user: state.user!));
+      }
+    } else if (event is BleScanRequest) {
       List<DiscoveredDevice> scanResults = [];
       yield state.copyWith(scanResults: scanResults);
       var scanListener = bleRepository.scan([kazuUpdateUuid]).listen((device) {
@@ -60,7 +79,7 @@ class BleBloc extends Bloc<BleEvent, BleState> {
       yield state.copyWith(device: event.device, user: event.user);
       Stream<ConnectionStateUpdate>? stream;
       if (state.device != null) {
-        stream = bleRepository.connect(state.device!);
+        stream = bleRepository.connect(id: state.device!);
       }
 
       if (stream != null) {
@@ -78,10 +97,10 @@ class BleBloc extends Bloc<BleEvent, BleState> {
       }
       yield state.copyWith(state: event.update.connectionState);
     } else if (event is BleConnected) {
-      int mtu = await bleRepository.requestMtu(deviceId: state.device!.id, mtu: 128);
+      int mtu = await bleRepository.requestMtu(deviceId: state.device!, mtu: 128);
       print(mtu);
 
-      List<DiscoveredService> services = await bleRepository.getServices(deviceId: state.device!.id);
+      List<DiscoveredService> services = await bleRepository.getServices(deviceId: state.device!);
       for (DiscoveredService service in services) {
         if (service.serviceId == kazuServiceUuid) {
           print("Found kazu service: $kazuServiceUuid");
@@ -93,7 +112,7 @@ class BleBloc extends Bloc<BleEvent, BleState> {
                   qcRx: QualifiedCharacteristic(
                       characteristicId: characteristic.characteristicId,
                       serviceId: service.serviceId,
-                      deviceId: state.device!.id,
+                      deviceId: state.device!,
                   )
               );
             } else if (characteristic.characteristicId == kazuTxNotifyUuid) {
@@ -103,7 +122,7 @@ class BleBloc extends Bloc<BleEvent, BleState> {
                   qcTxNotify: QualifiedCharacteristic(
                       characteristicId: characteristic.characteristicId,
                       serviceId: service.serviceId,
-                      deviceId: state.device!.id,
+                      deviceId: state.device!,
                   ),
               );
             } else if (characteristic.characteristicId == kazuTxUuid) {
@@ -113,7 +132,7 @@ class BleBloc extends Bloc<BleEvent, BleState> {
                   qcTx: QualifiedCharacteristic(
                       characteristicId: characteristic.characteristicId,
                       serviceId: service.serviceId,
-                      deviceId: state.device!.id,
+                      deviceId: state.device!,
                 ),
               );
             }
@@ -134,8 +153,8 @@ class BleBloc extends Bloc<BleEvent, BleState> {
 
 
       //_sendGetRtcMessage();
-      //_sendGetDeviceInformationMessage();
       _sendSetRtcMessage();
+      _sendGetDeviceInformationMessage();
 
       //await state.txNotify?.setNotifyValue(true);
       Stream<List<int>> rxNotifications = bleRepository.subscribeToNotification(qc: state.qcTxNotify!);
@@ -160,6 +179,7 @@ class BleBloc extends Bloc<BleEvent, BleState> {
                 dataRepository.processControlResponse(
                     userId: state.user?.id ?? "0",
                     controlEnvelope: control,
+                    bleId: state.device!,
                 );
               }
             }
@@ -177,17 +197,33 @@ class BleBloc extends Bloc<BleEvent, BleState> {
       }
     } else if (event is BleDisconnected) {
       if (state.device != null && state.connection != null) {
-        await bleRepository.disconnectFromDevice(state.connection!);
-        add(
-            BleConnectionEvent(
-              update: ConnectionStateUpdate(
-                deviceId: state.device!.id,
-                connectionState: DeviceConnectionState.disconnected,
-                failure: null,
-              )
-            )
-        );
+        if (state.state == DeviceConnectionState.connected) {
+          await state.connection!.cancel();
+          //await bleRepository.disconnectFromDevice(state.connection!);
+          yield state.copyWith(state: DeviceConnectionState.disconnected);
+        }
+        //add(
+        //    BleConnectionEvent(
+        //      update: ConnectionStateUpdate(
+        //        deviceId: state.device!,
+        //        connectionState: DeviceConnectionState.disconnected,
+        //        failure: null,
+        //      )
+        //    )
+        //);
       }
+    } else if (event is BleSubmitDose) {
+      _sendSetDosageMessage(event.dose);
+    } else if (event is BleSubmitLock) {
+      LockStatus status;
+      if (event.lock == true) {
+        status = LockStatus.LOCKED;
+      } else {
+        status = LockStatus.UNLOCKED;
+      }
+      _sendSetLockMessage(status);
+    } else if (event is BleSubmitTemperature) {
+      _sendSetTemperatureMessage(event.temperature);
     }
   }
 
@@ -428,5 +464,12 @@ class BleBloc extends Bloc<BleEvent, BleState> {
         add(BleTx(message: message));
       }
     }
+  }
+
+  Future<void> dispose() async {
+    if (state.state == DeviceConnectionState.connected) {
+      await state.connection?.cancel();
+    }
+    //bleRepository.disconnectFromDevice(state.connection!);
   }
 }

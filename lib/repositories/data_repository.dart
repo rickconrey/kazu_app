@@ -48,7 +48,7 @@ class DataRepository {
     }
   }
 
-  Future<Device> createDeviceFromProto({required DeviceInformation information, required String userId}) async {
+  Future<Device> createDeviceFromProto({required DeviceInformation information, required String userId, required String bleId}) async {
     Device device;
     String deviceId = "";
     for (int i in information.id) {
@@ -81,6 +81,7 @@ class DataRepository {
         lockStatus: lockStatus,
         batteryLevel: vbat,
         bleName: information.bleName,
+        bleId: bleId,
         lastSynced: TemporalTimestamp.now(),
       );
     } else {
@@ -94,6 +95,7 @@ class DataRepository {
         lockStatus: lockStatus,
         batteryLevel: vbat,
         bleName: information.bleName,
+        bleId: bleId,
         lastSynced: TemporalTimestamp.now(),
       );
     }
@@ -135,6 +137,19 @@ class DataRepository {
         sortBy: [Device.LASTSYNCED.descending()],
       );
       return devices.isNotEmpty ? devices.first.deviceId : null;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<Device?> getDeviceByUserId({required String userId}) async {
+    try {
+      final devices = await Amplify.DataStore.query(
+        Device.classType,
+        where: Device.USERID.eq(userId),
+        sortBy: [Device.LASTSYNCED.descending()],
+      );
+      return devices.isNotEmpty ? devices.first : null;
     } catch (e) {
       rethrow;
     }
@@ -193,7 +208,7 @@ class DataRepository {
     }
   }
 
-  Future<void> processControlResponse({required String userId, required ControlEnvelope controlEnvelope}) async {
+  Future<void> processControlResponse({required String userId, required ControlEnvelope controlEnvelope, required String bleId}) async {
     print(controlEnvelope);
     if (controlEnvelope.whichPayload() == ControlEnvelope_Payload.response) {
       switch (controlEnvelope.response.whichPayload()) {
@@ -201,6 +216,7 @@ class DataRepository {
           createDeviceFromProto(
             information: controlEnvelope.response.deviceInformation,
             userId: userId,
+            bleId: bleId,
           );
           break;
         case Response_Payload.rtcInformation:

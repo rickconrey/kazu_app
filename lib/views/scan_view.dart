@@ -29,7 +29,7 @@ class ScanView extends StatelessWidget {
                       state.state == DeviceConnectionState.disconnected
                         ? context.read<BleBloc>().add(
                           BleConnectRequest(
-                            device: item,
+                            device: item.id,
                             user: sessionCubit.currentUser,
                           )
                         )
@@ -137,7 +137,7 @@ class ScanResultTile extends StatelessWidget {
         title: _buildTitle(context),
         leading: Text(result.rssi.toString()),
         trailing: ElevatedButton(
-          child: (result.id == state.device?.id) && (state.state == DeviceConnectionState.connected)
+          child: (result.id == state.device) && (state.state == DeviceConnectionState.connected)
           //child: context.read<BleBloc>().state.isConnected!
               ? const Text('DISCONNECT')
               : const Text('CONNECT'),

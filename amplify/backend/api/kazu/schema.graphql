@@ -48,6 +48,7 @@ type Device @model @auth(rules: [{allow: public}]) {
   dose: Int
   temperature: Int
   batteryLevel: Int
+  bleId: String
 }
 
 type Cartridge @model @auth(rules: [{allow: public}]) {

@@ -8,7 +8,8 @@ class BleState {
   final User? user;
   final Map<String, dynamic>? result;
   //final BluetoothDevice? device;
-  final DiscoveredDevice? device;
+  //final DiscoveredDevice? device;
+  final String? device;
   final StreamSubscription<DiscoveredDevice>? scanner;
   final StreamSubscription<ConnectionStateUpdate>? connection;
   final DeviceConnectionState? state;
@@ -51,7 +52,8 @@ class BleState {
     StreamSubscription<DiscoveredDevice>? scanner,
     StreamSubscription<ConnectionStateUpdate>? connection,
     //BluetoothDevice? device,
-    DiscoveredDevice? device,
+    //DiscoveredDevice? device,
+    String? device,
     DeviceConnectionState? state,
     List<DiscoveredService>? services,
     DiscoveredCharacteristic? tx,

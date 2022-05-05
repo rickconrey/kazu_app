@@ -12,8 +12,8 @@ class BleRepository {
     return ble.scanForDevices(withServices: services, scanMode: ScanMode.balanced);
   }
 
-  Stream<ConnectionStateUpdate> connect(DiscoveredDevice device) {
-    return ble.connectToDevice(id: device.id);
+  Stream<ConnectionStateUpdate> connect({required String id}) {
+    return ble.connectToDevice(id: id);
   }
 
   Future<int> requestMtu({required String deviceId, required int mtu}) async {
