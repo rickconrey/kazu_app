@@ -166,13 +166,10 @@ class ChartBloc extends Bloc<ChartEvent, ChartState> {
 
   Future<List<TimeSeriesAmount>> _updateWeekData(PuffEvent event, List<TimeSeriesAmount> weekData) async {
     DateTime now = DateTime.now();
-    int startTime = DateTime(now.year, now.month, now.day - 7).millisecondsSinceEpoch ~/ 1000;
-    int endTime = DateTime(now.year, now.month, now.day + 1).millisecondsSinceEpoch ~/ 1000;
-    if (event.time!.toSeconds() > startTime && event.time!.toSeconds() < endTime) {
-      int day = DateTime
-          .fromMillisecondsSinceEpoch(event.time!.toSeconds() * 1000)
-          .day;
-      //weekData[day].amount += (event.amount ?? 0);
+    DateTime newEvent = DateTime.fromMillisecondsSinceEpoch(event.time!.toSeconds() * 1000);
+    int difference = (weekData.length - 1) - now.difference(newEvent).inDays;
+    if (difference < weekData.length && difference >= 0) {
+      weekData[difference].amount += (event.amount ?? 0);
     }
 
     return weekData;
@@ -180,13 +177,10 @@ class ChartBloc extends Bloc<ChartEvent, ChartState> {
 
   Future<List<TimeSeriesAmount>> _updateMonthData(PuffEvent event, List<TimeSeriesAmount> monthData) async {
     DateTime now = DateTime.now();
-    int startTime = DateTime(now.year, now.month, now.day - 30).millisecondsSinceEpoch ~/ 1000;
-    int endTime = DateTime(now.year, now.month, now.day + 1).millisecondsSinceEpoch ~/ 1000;
-    if (event.time!.toSeconds() > startTime && event.time!.toSeconds() < endTime) {
-      int day = DateTime
-          .fromMillisecondsSinceEpoch(event.time!.toSeconds() * 1000)
-          .day;
-      monthData[day].amount += (event.amount ?? 0);
+    DateTime newEvent = DateTime.fromMillisecondsSinceEpoch(event.time!.toSeconds() * 1000);
+    int difference = (monthData.length - 1) - now.difference(newEvent).inDays;
+    if (difference < monthData.length && difference >= 0) {
+      monthData[difference].amount += (event.amount ?? 0);
     }
 
     return monthData;
