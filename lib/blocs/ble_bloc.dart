@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'package:amplify_datastore/amplify_datastore.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 //import 'package:flutter_blue/flutter_blue.dart';
 import 'package:flutter_reactive_ble/flutter_reactive_ble.dart';
@@ -46,6 +47,7 @@ class BleBloc extends Bloc<BleEvent, BleState> {
       });
       bleRepository.ble.connectedDeviceStream.listen((event) {
         print("Ble Connect Device: " + event.connectionState.name);
+        add(BleConnectionEvent(update: event));
       });
     }
     if (event is BleAttemptAutoConnect) {
@@ -94,6 +96,13 @@ class BleBloc extends Bloc<BleEvent, BleState> {
     } else if (event is BleConnectionEvent) {
       if (event.update.connectionState == DeviceConnectionState.connected) {
         add(BleConnected());
+      } else if (event.update.connectionState == DeviceConnectionState.disconnected) {
+        Device? device = await dataRepository.getDeviceByUserId(userId: state.user!.id);
+        if (device != null) {
+          TemporalTimestamp now = TemporalTimestamp.fromSeconds(DateTime.now().millisecondsSinceEpoch ~/ 1000);
+          Device updated = device.copyWith(lastSynced: now);
+          await dataRepository.updateDevice(updated);
+        }
       }
       yield state.copyWith(state: event.update.connectionState);
     } else if (event is BleConnected) {

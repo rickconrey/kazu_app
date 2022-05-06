@@ -4,7 +4,7 @@ import 'package:flutter_reactive_ble/flutter_reactive_ble.dart';
 import 'package:kazu_app/events/ble_event.dart';
 import 'package:kazu_app/events/device_event.dart';
 import 'package:kazu_app/models/ModelProvider.dart';
-import 'package:kazu_app/states/form_submission_status.dart';
+import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 
 import '../blocs/ble_bloc.dart';
 import '../blocs/device_bloc.dart';
@@ -71,11 +71,12 @@ class DeviceView extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.start,
           children: [
-            _buildNameTile(),
+            _buildNameTile(connected),
             if (connected == false) _buildDisconnectedTile(),
             _buildVersionTile(),
             _buildDoseTile(),
             _buildTemperatureTile(),
+            _buildLastSyncedTile(),
             if (connected == true) _buildDisconnectedButtonTile(),
           ],
         ),
@@ -83,18 +84,38 @@ class DeviceView extends StatelessWidget {
     });
   }
 
+  Widget _buildLastSyncedTile() {
+    return BlocBuilder<DeviceBloc, DeviceState>(builder: (context, state) {
+      return ListTile(
+        title: Text(DateTime.fromMillisecondsSinceEpoch(state.device!.lastSynced!.toSeconds() * 1000).toString()),
+      );
+    });
+  }
+
   Widget _buildDisconnectedTile() {
-    return const ListTile(
-      tileColor: Colors.grey,
-      title: Center(
-        child: Text(
+    return BlocBuilder<DeviceBloc, DeviceState>(builder: (context, state)
+    {
+      return ListTile(
+        tileColor: Colors.grey,
+        title: const Center(
+          child: Text(
             "Disconnected",
-          style: TextStyle(
-            color: Colors.white,
+            style: TextStyle(
+              color: Colors.white,
+            ),
           ),
         ),
-      ),
-    );
+        trailing: IconButton(
+          icon: const Icon(
+            Icons.refresh,
+            color: Colors.white,
+          ),
+          onPressed: () =>
+              context.read<BleBloc>().add(
+                  BleAttemptAutoConnect(user: context.read<DeviceBloc>().user)),
+        ),
+      );
+    });
   }
 
   Widget _buildDisconnectedButtonTile() {
@@ -276,21 +297,37 @@ class DeviceView extends StatelessWidget {
     return _productString;
   }
 
-  Widget _buildNameTile() {
+  Widget _buildNameTile(bool connected) {
     return BlocBuilder<DeviceBloc, DeviceState>(builder: (context, state) {
       String _name = state.device?.bleName ?? "BT Name";
       String _deviceId = state.device?.deviceId ?? "Device ID";
       String _productId = "Kazu"; //_getProductString(state.device?.productId as ProductId);
       int _batteryLevel = state.device?.batteryLevel ?? 0;
       Icon _batteryIcon = const Icon(Icons.battery_full);
-      if (_batteryLevel > 3900) {
+      if (_batteryLevel >= 3900) {
         _batteryIcon = const Icon(
-          Icons.battery_full,
+          MdiIcons.battery,
           color: Colors.green,
+        );
+      } else if (_batteryLevel < 3900 && _batteryLevel > 3300) {
+        _batteryIcon = const Icon(
+          MdiIcons.battery50,
+          color: Colors.amber,
+        );
+      } else {
+        _batteryIcon = const Icon(
+          MdiIcons.battery10,
+          color: Colors.red,
+        );
+      }
+      if (connected == false) {
+        _batteryIcon = const Icon(
+          MdiIcons.batteryUnknown,
+          color: Colors.grey,
         );
       }
 
-        return ListTile(
+      return ListTile(
         //leading: const Icon(Icons.lock_outline),
         leading: IconButton(
           icon: (state.device?.lockStatus == DeviceLockStatus.LOCKED)
