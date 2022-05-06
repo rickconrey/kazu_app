@@ -16,7 +16,7 @@ class BleScanResult extends BleEvent {
   BleScanResult({this.result});
 
   @override
-  List<Object?> get props => [];
+  List<Object?> get props => [result];
 }
 class BleScanRequest extends BleEvent {
 
@@ -33,7 +33,7 @@ class BleConnectRequest extends BleEvent {
   BleConnectRequest({required this.device, required this.user});
 
   @override
-  List<Object?> get props => [];
+  List<Object?> get props => [device, user];
 }
 
 class BleConnectionEvent extends BleEvent {
@@ -42,7 +42,7 @@ class BleConnectionEvent extends BleEvent {
   BleConnectionEvent({required this.update});
 
   @override
-  List<Object?> get props => [];
+  List<Object?> get props => [update];
 }
 
 class BleAttemptAutoConnect extends BleEvent {
@@ -51,7 +51,7 @@ class BleAttemptAutoConnect extends BleEvent {
   BleAttemptAutoConnect({required this.user});
 
   @override
-  List<Object?> get props => [];
+  List<Object?> get props => [user];
 }
 
 class BleConnected extends BleEvent {

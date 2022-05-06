@@ -79,6 +79,7 @@ class BleBloc extends Bloc<BleEvent, BleState> {
 
     } else if (event is BleConnectRequest) {
       yield state.copyWith(device: event.device, user: event.user);
+      state.scanner?.cancel();
       Stream<ConnectionStateUpdate>? stream;
       if (state.device != null) {
         stream = bleRepository.connect(id: state.device!);
@@ -91,6 +92,13 @@ class BleBloc extends Bloc<BleEvent, BleState> {
         });
 
         yield state.copyWith(connection: connection);
+
+        // update user associated with device if device exists
+        Device? userDevice = await dataRepository.getDeviceByDeviceId(deviceId: state.device!);
+        if (userDevice != null && userDevice.userId != event.user.id) {
+          userDevice.copyWith(userId: event.user.id);
+          await dataRepository.updateDevice(userDevice);
+        }
       }
 
     } else if (event is BleConnectionEvent) {

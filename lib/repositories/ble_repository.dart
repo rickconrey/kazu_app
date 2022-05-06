@@ -9,7 +9,7 @@ class BleRepository {
   ProcessPacket processPacket = ProcessPacket();
 
   Stream<DiscoveredDevice> scan(List<Uuid> services) {
-    return ble.scanForDevices(withServices: services, scanMode: ScanMode.balanced);
+    return ble.scanForDevices(withServices: services, scanMode: ScanMode.lowPower);
   }
 
   Stream<ConnectionStateUpdate> connect({required String id}) {

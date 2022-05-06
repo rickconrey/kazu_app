@@ -1,10 +1,9 @@
 import 'dart:async';
-import 'package:equatable/equatable.dart';
 import 'package:flutter_reactive_ble/flutter_reactive_ble.dart';
 import 'package:kazu_app/models/User.dart';
 import 'package:synchronized/synchronized.dart';
 
-class BleState extends Equatable {
+class BleState {
   final User? user;
   final Map<String, dynamic>? result;
   final String? device;
@@ -39,9 +38,6 @@ class BleState extends Equatable {
     this.qcTxNotify,
     this.qcRx,
   });
-
-  @override
-  List<Object?> get props => [user, result, scanResults, device, scanner, connection, state, services, tx, txNotify, rx, qcTx, qcTxNotify, qcRx];
 
   BleState copyWith({
     User? user,
