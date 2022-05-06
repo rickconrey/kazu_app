@@ -15,3 +15,23 @@ class DeviceUpdate extends DeviceEvent {
 
   DeviceUpdate({required this.snapshot});
 }
+
+class DeviceTemperatureChanged extends DeviceEvent {
+  final int? temperature;
+
+  DeviceTemperatureChanged({this.temperature});
+}
+
+class DeviceDoseChanged extends DeviceEvent {
+  final int? dose;
+
+  DeviceDoseChanged({this.dose});
+}
+
+class DeviceTemperatureSubmitted extends DeviceEvent {}
+class DeviceDoseSubmitted extends DeviceEvent {}
+class DeviceLockSubmitted extends DeviceEvent {
+  final bool lock;
+  DeviceLockSubmitted({required this.lock});
+}
+

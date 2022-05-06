@@ -1,14 +1,13 @@
 import 'dart:async';
+import 'package:equatable/equatable.dart';
 import 'package:flutter_reactive_ble/flutter_reactive_ble.dart';
-//import 'package:flutter_blue/flutter_blue.dart';
 import 'package:kazu_app/models/User.dart';
 import 'package:synchronized/synchronized.dart';
 
-class BleState {
+class BleState extends Equatable {
   final User? user;
   final Map<String, dynamic>? result;
-  //final BluetoothDevice? device;
-  final DiscoveredDevice? device;
+  final String? device;
   final StreamSubscription<DiscoveredDevice>? scanner;
   final StreamSubscription<ConnectionStateUpdate>? connection;
   final DeviceConnectionState? state;
@@ -23,7 +22,6 @@ class BleState {
 
   Lock get bleLock => lock;
 
-  //List<ScanResult>? scanResults = [];
   List<DiscoveredDevice>? scanResults = [];
   BleState({
     this.user,
@@ -42,16 +40,16 @@ class BleState {
     this.qcRx,
   });
 
+  @override
+  List<Object?> get props => [user, result, scanResults, device, scanner, connection, state, services, tx, txNotify, rx, qcTx, qcTxNotify, qcRx];
+
   BleState copyWith({
     User? user,
-    //ScanResult? result,
     Map<String, dynamic>? result,
-    //List<ScanResult>? scanResults,
     List<DiscoveredDevice>? scanResults,
     StreamSubscription<DiscoveredDevice>? scanner,
     StreamSubscription<ConnectionStateUpdate>? connection,
-    //BluetoothDevice? device,
-    DiscoveredDevice? device,
+    String? device,
     DeviceConnectionState? state,
     List<DiscoveredService>? services,
     DiscoveredCharacteristic? tx,

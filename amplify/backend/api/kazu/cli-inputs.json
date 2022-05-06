@@ -18,6 +18,6 @@
       }
     },
     "apiName": "kazu",
-    "gqlSchemaPath": "/tmp/amplify-2fcaa100-fbef-43ab-805c-5564739be8e9/amplify/backend/api/kazu/schema.graphql"
+    "gqlSchemaPath": "/tmp/amplify-10ac6b64-7e67-4346-becc-4d4a3e980e21/amplify/backend/api/kazu/schema.graphql"
   }
 }
