@@ -41,7 +41,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
         storageRepository.getUrlForFile(imageKey),
       ]);
 
-      yield state.copyWith(avatarPath: results.last.toString());
+      yield state.copyWith(user: updatedUser, avatarPath: results.last.toString());
     } else if (event is ProvideImagePath) {
       yield state.copyWith(avatarPath: event.avatarPath);
     } else if (event is ProfileDescriptionChanged) {
@@ -53,7 +53,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
 
       try {
         await dataRepository.updateUser(updatedUser);
-        yield state.copyWith(formStatus: SubmissionSuccess(), userDescription: updatedUser.description);
+        yield state.copyWith(user: updatedUser, formStatus: SubmissionSuccess(), userDescription: updatedUser.description);
       } on Exception catch (e) {
         yield state.copyWith(formStatus: SubmissionFailed(e));
       }

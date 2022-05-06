@@ -12,6 +12,7 @@ class AuthRepository {
           .value;
       return userId;
     } catch (e) {
+      signOut();
       rethrow;
     }
   }
