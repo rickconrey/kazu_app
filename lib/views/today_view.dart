@@ -24,6 +24,7 @@ class TodayView extends StatelessWidget{
   Widget build(BuildContext context) {
     double screenHeight = MediaQuery.of(context).size.height;
     double statusBarHeight = MediaQuery.of(context).padding.top;
+    String _version = "22.05.00";
     return MultiBlocProvider(
       providers: [
         BlocProvider(create: (context) => ChartNavigatorCubit()),
@@ -55,6 +56,7 @@ class TodayView extends StatelessWidget{
               },
               icon: const Icon(Icons.person),
             ),
+            actions: [Text(_version)],
           );
           double appBarHeight = appBar.preferredSize.height;
           double totalHeight = screenHeight - appBarHeight - statusBarHeight;
