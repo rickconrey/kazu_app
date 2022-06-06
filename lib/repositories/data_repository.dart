@@ -129,6 +129,18 @@ class DataRepository {
     }
   }
 
+  Future<Device?> getDeviceByBleId({required String bleId}) async {
+    try {
+      final devices = await Amplify.DataStore.query(
+        Device.classType,
+        where: Device.BLEID.eq(bleId),
+      );
+      return devices.isNotEmpty ? devices.first : null;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
   Future<String?> getDeviceIdByUserId({required String userId}) async {
     try {
       final devices = await Amplify.DataStore.query(

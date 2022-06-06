@@ -62,7 +62,7 @@ class DeviceBloc extends Bloc<DeviceEvent, DeviceState> {
     } else if (event is DeviceTemperatureChanged) {
       yield state.copyWith(temperature: event.temperature);
     } else if (event is DeviceDoseChanged) {
-      yield state.copyWith(temperature: event.dose);
+      yield state.copyWith(dose: event.dose);
     }
   }
 }

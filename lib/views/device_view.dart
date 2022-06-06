@@ -78,6 +78,7 @@ class DeviceView extends StatelessWidget {
             _buildTemperatureTile(),
             _buildLastSyncedTile(),
             if (connected == true) _buildDisconnectedButtonTile(),
+            _buildDeleteButtonTile(),
           ],
         ),
       );
@@ -125,10 +126,26 @@ class DeviceView extends StatelessWidget {
         trailing: IconButton(
           alignment: Alignment.bottomLeft,
           icon: const Icon(
-            Icons.delete,
+            MdiIcons.bluetoothOff,
             //color: Colors.red,
           ),
           onPressed: () => BlocProvider.of<BleBloc>(context).add(BleDisconnected()),
+        ),
+      );
+    });
+  }
+
+  Widget _buildDeleteButtonTile() {
+    return BlocBuilder<DeviceBloc, DeviceState>(builder: (context, state)
+    {
+      return ListTile(
+        trailing: IconButton(
+          alignment: Alignment.bottomLeft,
+          icon: const Icon(
+            Icons.delete,
+            //color: Colors.red,
+          ),
+          onPressed: () => BlocProvider.of<BleBloc>(context).add(BleDelete()),
         ),
       );
     });

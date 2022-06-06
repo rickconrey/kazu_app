@@ -94,10 +94,10 @@ class BleBloc extends Bloc<BleEvent, BleState> {
         yield state.copyWith(connection: connection);
 
         // update user associated with device if device exists
-        Device? userDevice = await dataRepository.getDeviceByDeviceId(deviceId: state.device!);
+        Device? userDevice = await dataRepository.getDeviceByBleId(bleId: state.device!);
         if (userDevice != null && userDevice.userId != event.user.id) {
-          userDevice.copyWith(userId: event.user.id);
-          await dataRepository.updateDevice(userDevice);
+          Device updatedDevice = userDevice.copyWith(userId: event.user.id);
+          await dataRepository.updateDevice(updatedDevice);
         }
       }
 
@@ -219,15 +219,19 @@ class BleBloc extends Bloc<BleEvent, BleState> {
           //await bleRepository.disconnectFromDevice(state.connection!);
           yield state.copyWith(state: DeviceConnectionState.disconnected);
         }
-        //add(
-        //    BleConnectionEvent(
-        //      update: ConnectionStateUpdate(
-        //        deviceId: state.device!,
-        //        connectionState: DeviceConnectionState.disconnected,
-        //        failure: null,
-        //      )
-        //    )
-        //);
+      }
+    } else if (event is BleDelete) {
+      if (state.device != null && state.connection != null) {
+        if (state.state == DeviceConnectionState.connected) {
+          await state.connection!.cancel();
+          //await bleRepository.disconnectFromDevice(state.connection!);
+          yield state.copyWith(state: DeviceConnectionState.disconnected);
+        }
+        Device? userDevice = await dataRepository.getDeviceByBleId(bleId: state.device!);
+        if (userDevice != null) {
+          Device updatedDevice = userDevice.copyWith(userId: "");
+          await dataRepository.updateDevice(updatedDevice);
+        }
       }
     } else if (event is BleSubmitDose) {
       _sendSetDosageMessage(event.dose);

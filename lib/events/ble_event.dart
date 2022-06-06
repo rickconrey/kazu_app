@@ -64,6 +64,11 @@ class BleDisconnected extends BleEvent {
   @override
   List<Object?> get props => [];
 }
+class BleDelete extends BleEvent {
+
+  @override
+  List<Object?> get props => [];
+}
 class BleSubscribe extends BleEvent {
   @override
   List<Object?> get props => [];
