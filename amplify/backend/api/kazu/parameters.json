@@ -2,5 +2,5 @@
   "AppSyncApiName": "kazu",
   "DynamoDBBillingMode": "PAY_PER_REQUEST",
   "DynamoDBEnableServerSideEncryption": false,
-  "AuthModeLastUpdated": "2022-04-20T16:56:21.360Z"
+  "AuthModeLastUpdated": "2022-06-02T22:24:32.533Z"
 }

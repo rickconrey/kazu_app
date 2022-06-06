@@ -4,8 +4,9 @@
     "serviceName": "AppSync",
     "defaultAuthType": {
       "mode": "API_KEY",
-      "keyDescription": "api key description",
-      "expirationTime": 30
+      "expirationTime": 365,
+      "apiKeyExpirationDate": "2023-06-02T22:24:27.534Z",
+      "keyDescription": "api key description"
     },
     "additionalAuthTypes": [
       {
@@ -18,6 +19,6 @@
       }
     },
     "apiName": "kazu",
-    "gqlSchemaPath": "/tmp/amplify-10ac6b64-7e67-4346-becc-4d4a3e980e21/amplify/backend/api/kazu/schema.graphql"
+    "gqlSchemaPath": "/Users/rick/projects/kazu_app/amplify/backend/api/kazu/schema.graphql"
   }
 }
