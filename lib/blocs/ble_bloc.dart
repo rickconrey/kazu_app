@@ -1,18 +1,18 @@
 import 'dart:async';
-import 'dart:io';
+import 'dart:convert';
 import 'package:amplify_datastore/amplify_datastore.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-//import 'package:flutter_blue/flutter_blue.dart';
 import 'package:flutter_reactive_ble/flutter_reactive_ble.dart';
 import 'package:kazu_app/events/ble_event.dart';
 import 'package:kazu_app/generated/cartridge/mutable.pb.dart';
 import 'package:kazu_app/generated/telemetry.pb.dart';
 import 'package:kazu_app/generated/control.pb.dart';
-import 'package:kazu_app/models/User.dart';
 import 'package:kazu_app/repositories/ble_repository.dart';
 import 'package:kazu_app/repositories/data_repository.dart';
 import 'package:kazu_app/states/ble_state.dart';
 import 'package:kazu_app/utils/cobs.dart';
+import 'package:http/http.dart' as http;
+import 'package:collection/collection.dart';
 
 import '../models/Device.dart';
 import '../utils/packet.dart';
@@ -20,17 +20,19 @@ import '../utils/packet.dart';
 class BleBloc extends Bloc<BleEvent, BleState> {
   final BleRepository bleRepository;
   final DataRepository dataRepository;
-  //final Guid kazuServiceUuid = Guid("c6f9b530-b0b1-b2f4-5769-7469f5b2b1b0");
-  //final Guid kazuTxUuid = Guid("c6f9b531-b0b1-b2f4-5769-7469f5b2b1b0");
-  //final Guid kazuTxNotifyUuid = Guid("c6f9b532-b0b1-b2f4-5769-7469f5b2b1b0");
-  //final Guid kazuRxUuid = Guid("c6f9b533-b0b1-b2f4-5769-7469f5b2b1b0");
-  //final Guid kazuUpdateUuid = Guid("8D53DC1D-1DB7-4CD3-868B-8A527460AA84");
   final Uuid kazuUpdateUuid = Uuid([0x8d, 0x53, 0xdc, 0x1d, 0x1d, 0xb7, 0x4c, 0xd3, 0x86, 0x8b, 0x8a, 0x52, 0x74, 0x60, 0xaa, 0x84]);
   final Uuid kazuServiceUuid = Uuid([0xc6, 0xf9, 0xb5, 0x30, 0xb0, 0xb1, 0xb2, 0xf4, 0x57, 0x69, 0x74, 0x69, 0xf5, 0xb2, 0xb1, 0xb0]);
   final Uuid kazuTxUuid = Uuid([0xc6, 0xf9, 0xb5, 0x31, 0xb0, 0xb1, 0xb2, 0xf4, 0x57, 0x69, 0x74, 0x69, 0xf5, 0xb2, 0xb1, 0xb0]);
   final Uuid kazuTxNotifyUuid = Uuid([0xc6, 0xf9, 0xb5, 0x32, 0xb0, 0xb1, 0xb2, 0xf4, 0x57, 0x69, 0x74, 0x69, 0xf5, 0xb2, 0xb1, 0xb0]);
   final Uuid kazuRxUuid = Uuid([0xc6, 0xf9, 0xb5, 0x33, 0xb0, 0xb1, 0xb2, 0xf4, 0x57, 0x69, 0x74, 0x69, 0xf5, 0xb2, 0xb1, 0xb0]);
 
+  final Uuid kazuMdsServiceUuid = Uuid([0x54, 0x22, 0x00, 0x00, 0xf6, 0xa5, 0x40, 0x07, 0xa3, 0x71, 0x72, 0x2f, 0x4e, 0xbd, 0x84, 0x36]);
+  final Uuid kazuMdsFeaturesUuid = Uuid([0x54, 0x22, 0x00, 0x01, 0xf6, 0xa5, 0x40, 0x07, 0xa3, 0x71, 0x72, 0x2f, 0x4e, 0xbd, 0x84, 0x36]);
+  final Uuid kazuMdsDeviceIdUuid = Uuid([0x54, 0x22, 0x00, 0x02, 0xf6, 0xa5, 0x40, 0x07, 0xa3, 0x71, 0x72, 0x2f, 0x4e, 0xbd, 0x84, 0x36]);
+  final Uuid kazuMdsDataUriUuid = Uuid([0x54, 0x22, 0x00, 0x03, 0xf6, 0xa5, 0x40, 0x07, 0xa3, 0x71, 0x72, 0x2f, 0x4e, 0xbd, 0x84, 0x36]);
+  final Uuid kazuMdsAuthorizationUuid = Uuid([0x54, 0x22, 0x00, 0x04, 0xf6, 0xa5, 0x40, 0x07, 0xa3, 0x71, 0x72, 0x2f, 0x4e, 0xbd, 0x84, 0x36]);
+  final Uuid kazuMdsDataExportUuid = Uuid([0x54, 0x22, 0x00, 0x05, 0xf6, 0xa5, 0x40, 0x07, 0xa3, 0x71, 0x72, 0x2f, 0x4e, 0xbd, 0x84, 0x36]);
+  static List<int> lastSent = [0];
   BleBloc({
     required this.bleRepository,
     required this.dataRepository,
@@ -154,6 +156,64 @@ class BleBloc extends Bloc<BleEvent, BleState> {
               );
             }
           }
+        } else if (service.serviceId == kazuMdsServiceUuid) {
+          print("Found Mds Service");
+          for (DiscoveredCharacteristic characteristic in service
+              .characteristics) {
+            if (characteristic.characteristicId == kazuMdsFeaturesUuid) {
+              print("Found Mds Features");
+              yield state.copyWith(
+                  mdsFeatures: characteristic,
+                  qcMdsFeatures: QualifiedCharacteristic(
+                    characteristicId: characteristic.characteristicId,
+                    serviceId: service.serviceId,
+                    deviceId: state.device!,
+                  )
+              );
+            } else if (characteristic.characteristicId == kazuMdsDeviceIdUuid) {
+              print("Found Mds Device Id");
+              yield state.copyWith(
+                  mdsDeviceId: characteristic,
+                  qcMdsDeviceId: QualifiedCharacteristic(
+                    characteristicId: characteristic.characteristicId,
+                    serviceId: service.serviceId,
+                    deviceId: state.device!,
+                  )
+              );
+            } else if (characteristic.characteristicId == kazuMdsDataUriUuid) {
+              print("Found Mds Data Uri");
+              yield state.copyWith(
+                  mdsDataUri: characteristic,
+                  qcMdsDataUri: QualifiedCharacteristic(
+                    characteristicId: characteristic.characteristicId,
+                    serviceId: service.serviceId,
+                    deviceId: state.device!,
+                  )
+              );
+            } else
+            if (characteristic.characteristicId == kazuMdsAuthorizationUuid) {
+              print("Found Mds Authorization");
+              yield state.copyWith(
+                  mdsAuthorization: characteristic,
+                  qcMdsAuthorization: QualifiedCharacteristic(
+                    characteristicId: characteristic.characteristicId,
+                    serviceId: service.serviceId,
+                    deviceId: state.device!,
+                  )
+              );
+            } else
+            if (characteristic.characteristicId == kazuMdsDataExportUuid) {
+              print("Found Mds Data Export");
+              yield state.copyWith(
+                  mdsDataExport: characteristic,
+                  qcMdsDataExport: QualifiedCharacteristic(
+                    characteristicId: characteristic.characteristicId,
+                    serviceId: service.serviceId,
+                    deviceId: state.device!,
+                  )
+              );
+            }
+          }
         }
       }
       yield state.copyWith(services: services);
@@ -203,6 +263,47 @@ class BleBloc extends Bloc<BleEvent, BleState> {
           }
         }
       });
+
+      List<int> dataUriList = await bleRepository.read(qc: state.qcMdsDataUri!);
+      List<int> authorizationList = await bleRepository.read(qc: state.qcMdsAuthorization!);
+      List<int> deviceIdList = await bleRepository.read(qc: state.qcMdsDeviceId!);
+
+      String deviceIdString = utf8.decode(deviceIdList);
+      String authorizationString = utf8.decode(authorizationList);
+      String dataUriString = utf8.decode(dataUriList);
+
+      String authorizationKey = authorizationString.split(":")[0];
+      String authorizationValue = authorizationString.split(":")[1];
+
+      yield state.copyWith(
+        deviceId: deviceIdString,
+        dataUri: dataUriString,
+        authorizationValue: authorizationValue,
+        authorizationKey: authorizationKey,
+      );
+
+      Stream<List<int>> dataExportNotifications = bleRepository.subscribeToNotification(qc: state.qcMdsDataExport!);
+      dataExportNotifications.listen((value) async {
+        Function eq = const ListEquality().equals;
+        if (value.isNotEmpty) {
+          if (eq(lastSent, value) == true) {
+            return;
+          }
+          lastSent = value;
+          http.post(
+            Uri.parse(state.dataUri!),
+            headers: <String, String>{
+              state.authorizationKey!: state.authorizationValue!,
+              "Content-Type": "application/octet-stream",
+            },
+            body: value,
+            //body: jsonEncode(<String, String>{
+            //  'title': title,
+            //}),
+          );
+        }
+      });
+
     } else if (event is BleTx) {
       try {
         if (event.message != null && state.qcRx != null) {
